@@ -1,7 +1,6 @@
 package com.martflow.billing.item;
 
 import com.martflow.billing.visitor.BillItemVisitor;
-import com.martflow.catalog.Product;
 import com.martflow.catalog.UnitProduct;
 import com.martflow.common.MoneyUtil;
 

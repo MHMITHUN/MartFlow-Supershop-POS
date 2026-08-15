@@ -23,8 +23,20 @@ const API = (() => {
         localStorage.removeItem("martflow.user");
     };
 
+    function toSearchParams(query) {
+        const params = new URLSearchParams();
+        if (query) {
+            for (const [k, v] of Object.entries(query)) {
+                if (v !== undefined && v !== null && v !== "") {
+                    params.set(k, v);
+                }
+            }
+        }
+        return params;
+    }
+
     async function request(method, path, body, query) {
-        const params = new URLSearchParams(query || {});
+        const params = toSearchParams(query);
         const url = BASE + path + (params.toString() ? "?" + params.toString() : "");
         const opts = { method, headers: {} };
         if (token) opts.headers["Authorization"] = "Bearer " + token;
@@ -51,7 +63,7 @@ const API = (() => {
 
     /** CSV download (reports) — triggers the browser file save. */
     async function downloadCsv(path, query) {
-        const params = new URLSearchParams(query || {});
+        const params = toSearchParams(query);
         params.set("format", "csv");
         const res = await fetch(BASE + path + "?" + params.toString(), {
             headers: { Authorization: "Bearer " + token }

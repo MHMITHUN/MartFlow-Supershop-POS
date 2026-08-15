@@ -169,4 +169,12 @@ class BillingApiTest {
                         .content("{\"code\":\"NOPE\",\"netTotal\":1000}"), cashierToken))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void invalidCouponOnBillIsRejected() throws Exception {
+        mvc.perform(auth(put("/api/bill/coupon").contentType("application/json")
+                        .content("{\"code\":\"INVALID_COUPON_123\"}"), cashierToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Unknown coupon code: INVALID_COUPON_123"));
+    }
 }

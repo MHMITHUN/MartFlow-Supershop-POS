@@ -1,9 +1,7 @@
 package com.martflow.persistence;
 
-import com.martflow.auth.User;
 import com.martflow.auth.UserRepository;
 import com.martflow.catalog.Product;
-import com.martflow.loyalty.Customer;
 import com.martflow.loyalty.CustomerRepository;
 import com.martflow.pricing.Promotion;
 import com.martflow.sales.Sale;

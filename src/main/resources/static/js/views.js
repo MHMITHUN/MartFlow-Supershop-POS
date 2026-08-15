@@ -100,8 +100,8 @@ const Views = (() => {
 
         function renderQuick(cat) {
             const grid = UI.$("#posQuick", host);
-            const list = cat === "all" ? products.slice(0, 24)
-                : products.filter((p) => p.categoryId === cat).slice(0, 24);
+            const list = cat === "all" ? products
+                : products.filter((p) => p.categoryId === cat);
             grid.innerHTML = list.map((p) => `
                 <div class="col-4 col-md-3">
                   <button class="mf-quick-tile" data-id="${UI.esc(p.id)}">
@@ -189,13 +189,15 @@ const Views = (() => {
                 <i class="bi bi-person-badge"></i>
                 <span class="small">${bill.customer ? UI.esc(bill.customer.name) + " · " + bill.customer.points + " pts" : "Walk-in customer"}</span>
                 <button class="btn btn-sm mf-btn-ghost ms-auto" id="btnCustomer">Attach</button>
-                <button class="btn btn-sm mf-btn-ghost" id="btnCoupon">Coupon</button>
+                ${bill.couponCode
+                  ? `<span class="badge text-bg-success d-inline-flex align-items-center gap-1"><i class="bi bi-ticket-perforated"></i> ${UI.esc(bill.couponCode)} <i class="bi bi-x-circle text-white mf-cursor-pointer" id="btnRemoveCoupon" title="Remove coupon"></i></span>`
+                  : `<button class="btn btn-sm mf-btn-ghost" id="btnCoupon">Coupon</button>`}
                 <button class="btn btn-sm mf-btn-ghost" id="btnCharges">Bags/Delivery</button>
               </div>
               <div class="mf-bill-totals">
                 <div><span>Gross</span><span>${UI.money(t.gross)}</span></div>
                 ${t.discount > 0 ? `<div class="text-success"><span>Promotions</span><span>-${UI.money(t.discount)}</span></div>` : ""}
-                ${t.coupon > 0 ? `<div class="text-success"><span>Coupon</span><span>-${UI.money(t.coupon)}</span></div>` : ""}
+                ${t.coupon > 0 ? `<div class="text-success"><span>Coupon (${UI.esc(bill.couponCode || "")})</span><span>-${UI.money(t.coupon)}</span></div>` : ""}
                 ${t.fees > 0 ? `<div><span>Carry bag / delivery</span><span>${UI.money(t.fees)}</span></div>` : ""}
                 <div class="mf-bill-net"><span>PAYABLE</span><span>${UI.money(t.net)}</span></div>
                 <div class="text-secondary small"><span>incl. VAT</span><span>${UI.money(t.vat)}</span></div>
@@ -233,6 +235,14 @@ const Views = (() => {
             }));
             UI.$$("#btnCustomer", panel).forEach((b) => b.addEventListener("click", pickCustomer));
             UI.$$("#btnCoupon", panel).forEach((b) => b.addEventListener("click", askCoupon));
+            UI.$$("#btnRemoveCoupon", panel).forEach((b) => b.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                try {
+                    await API.setBillCoupon({ code: "" });
+                    refreshBill();
+                    UI.ok("Coupon removed");
+                } catch (err) { UI.fail(err.message); }
+            }));
             const btnCharges = UI.$("#btnCharges", panel);
             if (btnCharges) btnCharges.addEventListener("click", askCharges);
             const btnTender = UI.$("#btnTender", panel);
@@ -260,12 +270,17 @@ const Views = (() => {
         }
 
         async function askCoupon() {
-            const code = window.prompt("Coupon code (empty to remove):", bill.couponCode || "");
-            if (code === null) return;
+            const raw = window.prompt("Coupon code (empty to remove):", (bill && bill.couponCode) || "");
+            if (raw === null) return;
+            const code = raw.trim();
             try {
+                if (code) {
+                    const gross = (bill && bill.totals) ? bill.totals.gross : 0;
+                    await API.checkCoupon({ code, netTotal: gross });
+                }
                 await API.setBillCoupon({ code });
                 refreshBill();
-                UI.ok(code ? "Coupon applied" : "Coupon removed");
+                UI.ok(code ? `Coupon '${code.toUpperCase()}' applied` : "Coupon removed");
             } catch (err) { UI.fail(err.message); }
         }
 

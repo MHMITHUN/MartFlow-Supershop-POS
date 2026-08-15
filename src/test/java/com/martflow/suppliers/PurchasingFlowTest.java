@@ -11,7 +11,6 @@ import com.martflow.persistence.InMemoryTemplateRepository;
 import com.martflow.security.Caller;
 import com.martflow.security.Role;
 import com.martflow.security.RoleContext;
-import com.martflow.suppliers.postate.PurchaseOrderState;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

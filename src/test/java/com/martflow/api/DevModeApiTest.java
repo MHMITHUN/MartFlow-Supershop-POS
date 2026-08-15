@@ -107,11 +107,12 @@ class DevModeApiTest {
             }
             Set<org.springframework.web.bind.annotation.RequestMethod> verbs =
                     info.getMethodsCondition().getMethods();
-            if (info.getPathPatternsCondition() == null) {
+            var pathPatterns = info.getPathPatternsCondition();
+            if (pathPatterns == null) {
                 continue;
             }
             for (org.springframework.web.util.pattern.PathPattern pattern
-                    : info.getPathPatternsCondition().getPatterns()) {
+                    : pathPatterns.getPatterns()) {
                 String path = pattern.getPatternString();
                 if (path.startsWith("/api")) {
                     for (org.springframework.web.bind.annotation.RequestMethod verb : verbs) {

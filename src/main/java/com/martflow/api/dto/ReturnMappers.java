@@ -1,6 +1,5 @@
 package com.martflow.api.dto;
 
-import com.martflow.returns.ReturnLine;
 import com.martflow.returns.SaleReturn;
 
 /** Maps returns to their API responses. */

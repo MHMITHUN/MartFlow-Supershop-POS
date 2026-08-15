@@ -5,11 +5,7 @@ import com.martflow.billing.commands.BillingInvoker;
 import com.martflow.billing.commands.ChargeTenderCommand;
 import com.martflow.billing.commands.CreateSaleCommand;
 import com.martflow.billing.commands.ReserveStockCommand;
-import com.martflow.billing.decorator.CarryBagFee;
-import com.martflow.billing.decorator.DeliveryFee;
 import com.martflow.billing.decorator.LineDiscount;
-import com.martflow.billing.decorator.RoundOffAdjustment;
-import com.martflow.billing.item.AdjustmentLine;
 import com.martflow.billing.item.BillableItem;
 import com.martflow.billing.item.ComboLine;
 import com.martflow.billing.item.UnitLine;
@@ -158,8 +154,11 @@ public class BillingFacade {
 
     public Bill setCoupon(String token, String code) {
         BillingSession session = sessions.sessionFor(token);
+        if (code != null && !code.isBlank()) {
+            engine.couponAmount(code.trim(), session.bill().totals(engine).gross());
+        }
         session.snapshot();
-        session.bill().setCouponCode(code == null || code.isBlank() ? null : code.trim());
+        session.bill().setCouponCode(code == null || code.isBlank() ? null : code.trim().toUpperCase(java.util.Locale.ROOT));
         return session.bill();
     }
 
