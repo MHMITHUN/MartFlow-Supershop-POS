@@ -230,10 +230,11 @@ public final class SeedData {
                 "95", "110", "25", 8, null));
 
         // ---- Snacks (VAT 15%) ----
-        save(repo, unit("p19", "PRAN-CHAN-200", "8941234500240", "Pran Chanachur 200g",
+        Product chanachur = unit("p19", "PRAN-CHAN-200", "8941234500240", "Pran Chanachur 200g",
                 "Spicy chanachur mix", "snacks", "SUP-003", "PACK",
-                "42", "50", "34", 20, batch("B-CHN-0225", today.plusDays(150), "24"),
-                batch("B-CHN-0125", today.plusDays(10), "10"))); // near-expiry batch demo
+                "42", "50", "34", 20, batch("B-CHN-0225", today.plusDays(150), "24"));
+        chanachur.addBatch(batch("B-CHN-0125", today.plusDays(10), "10")); // near-expiry batch demo
+        save(repo, chanachur);
         save(repo, unit("p20", "FR-STICKS-30", "8941234500257", "Fresh Potato Sticks 30g",
                 "Crispy potato snacks", "snacks", "SUP-003", "PACK",
                 "14", "20", "80", 25, null));
@@ -289,15 +290,12 @@ public final class SeedData {
 
     private static Product unit(String id, String sku, String barcode, String name, String description,
                                 String categoryId, String supplierId, String unitName,
-                                String cost, String mrp, String stock, int reorder, Batch... batches) {
+                                String cost, String mrp, String stock, int reorder, Batch batch) {
         UnitProduct product = new UnitProduct(id, sku, barcode, name, description, categoryId,
                 supplierId, ProductUnit.valueOf(unitName), new BigDecimal(cost), new BigDecimal(mrp),
                 new BigDecimal(stock), reorder);
-        // a bare trailing null argument binds to the varargs array itself, not to an element
-        if (batches != null) {
-            for (Batch batch : batches) {
-                product.addBatch(batch);
-            }
+        if (batch != null) {
+            product.addBatch(batch);
         }
         return product;
     }
