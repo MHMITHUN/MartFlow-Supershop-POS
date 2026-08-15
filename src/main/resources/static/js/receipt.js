@@ -332,8 +332,11 @@ const Receipt = (() => {
 
         // Enter continues to the next customer (ignored while typing in fields or
         // focusing a button, so form submits and native clicks keep working).
+        // Armed on "shown" — bootstrap silently drops hide() calls that land while the
+        // show transition is still running, which would eat an impatient keypress.
         let onKey = null;
-        if (opts.onNext) {
+        const modalEl = UI.$("#modalHost .modal");
+        if (opts.onNext && modalEl) {
             onKey = (e) => {
                 if (e.key !== "Enter") return;
                 const tag = ((e.target && e.target.tagName) || "").toLowerCase();
@@ -342,14 +345,13 @@ const Receipt = (() => {
                 inst.hide();
                 opts.onNext();
             };
-            document.addEventListener("keydown", onKey);
+            modalEl.addEventListener("shown.bs.modal", () =>
+                document.addEventListener("keydown", onKey));
+            modalEl.addEventListener("hidden.bs.modal", () =>
+                document.removeEventListener("keydown", onKey));
             const nextBtn = UI.$("#btnNextCustomer");
             if (nextBtn) nextBtn.addEventListener("click", () => opts.onNext());
         }
-        const modalEl = UI.$("#modalHost .modal");
-        if (modalEl) modalEl.addEventListener("hidden.bs.modal", () => {
-            if (onKey) document.removeEventListener("keydown", onKey);
-        });
 
         return { inst, plainText };
     }
