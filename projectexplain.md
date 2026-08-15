@@ -635,5 +635,150 @@ age, pattern porer — ei project er main policy.
 
 ---
 
+## 24. Puro ACCESS MAP — ke ki pabe, kano alada, kon button er ki kaj
+
+Ei section ta **exam/viva er ready reference** — prottek role, prottek option, ki kaj,
+kivabe kaj kore, ar keno alada.
+
+### 24.1 Ek line e philosophy
+
+Supershop e **trust er 3 level** + **1 technical role**: cashier protidin poisa chuye,
+manager shop chalay, malik (admin) business er marattik decision ney, developer (sudhu
+demo/viva-r jonno) pattern dekhe. Role alada na korle: cashier dam komiye dite parto,
+rokom poriskar poriskar kore stock muchhe felte parto, keu jekono receipt void kore
+poisa habis korte parto. Tai: **jei kaj dokandari/khoti korhte pare, seta manager+;
+jei kaj puro business ke affect kore, seta sudhu malik.**
+
+### 24.2 Master table — screen onujayi ke ki dekhe
+
+| Screen (navbar) | Cashier | Developer | Manager | Admin | Kano ei role-e |
+|---|---|---|---|---|---|
+| POS (bikri) | ✔ | ✔ | ✔ | ✔ | Bikri shobai kore — ekhane lock korle shop cholbe na |
+| Inventory (stock) | ✔ | ✔ | ✔ | ✔ | Stock dekha shobar dorkar; **button gulo alada** (nice dekho) |
+| Loyalty (customers) | ✔ | ✔ | ✔ | ✔ | Member attach kajer; **points adjust manager+** |
+| Returns | ✔ | ✔ | ✔ | ✔ | Return till e hoy; **history manager+** |
+| Reports | ✔ (4 ta) | ✔ (4 ta) | ✔ (8 ta) | ✔ (8 ta) | Operational report shobaiar; **finance report manager+** |
+| Alerts | ✔ | ✔ | ✔ | ✔ | Low stock/expiry sobaike dekhte hobe |
+| Dashboard | — | — | ✔ | ✔ | Aajker hisheb = shop chalanor kaj, cashier er na |
+| Purchases | — | — | ✔ | ✔ | Maal kena = poisa geche, manager er decision |
+| Sales Explorer | — | — | ✔ | ✔ | Sob receipt dekha + VOID = power, cashier ke lagbe na |
+| Promotions | — | — | ✔ | ✔ | Dam komano/barano = marketing + margin er byapar |
+| Activity Log | — | — | ✔ | ✔ | "Ke ki korlo" = accountability, keu nijer upor judge hobe na |
+| Day Close (Z) | — | — | ✔ | ✔ | Drawer reconciliation + poisa safe e tola = manager sesh kaj |
+| Staff | — | — | — | ✔ | Ke jabo shop e, ke pay pabe — shudhu malik er boro |
+| Developer Mode | — | ✔ | — | — | Pattern/API/diagnostics — examiner ba dev er jinish, business na |
+
+> **Ekta screen e "✔" mane shob button na** — niche `24.5` e dekho, same screen e
+> button-level alada gate ase (Inventory sobai dekhe kintu Delete shudhu admin).
+
+### 24.3 CASHIER er puro option list (ki kaj + kivabe kaj kore)
+
+| Option | Ki kaj | Bhitore kivabe chole |
+|---|---|---|
+| **POS — Scan box** | Barcode/type kore item add | ≥6 digit = barcode lookup API, onno word = name search → `POST /api/bill/lines` → bill session e line |
+| **POS — Category chips + tiles** | Hate item select | Shob product `GET /api/products?view=in_stock` theke ashe (Iterator pattern) |
+| **+/– /✏️/🗑️ (line e)** | Qty barano/komano (unit e 1 step, weighed e 0.25 kg), pencil = weight change, delete = line muchhe | `PUT /api/bill/lines/{index}` — memento te purano state save thake |
+| **Undo (n)** | Last kaj undo — mis-scan er ilaz | `POST /api/bill/undo` — Memento stack theke ager snapshot fire |
+| **Clear (✕)** | Puro bill fele dewa | `DELETE /api/bill` |
+| **Attach** | Loyalty member lagano → 5% member price auto | `PUT /api/bill/customer` → PromotionEngine MemberPrice strategy chalu hoy |
+| **Coupon** | Coupon code (SAVE50, WELCOME10) | `PUT /api/bill/coupon` → validate hose, tender er somoy chain check kore |
+| **Bags/Delivery** | 5 taka bag + delivery charge | `PUT /api/bill/charges` → Decorator hisebe bill e jore |
+| **Take payment** | Split tender (CASH/CARD/BKASH/NAGAD/POINTS) | `POST /api/bill/tender` → validation chain → 4 Command (Reserve→Charge→Points→CreateSale) — ekta failhle SOB rollback |
+| **Receipt (print/copy/save)** | Thermal print, text copy, TXT download | Iframe printer (320px slip); Reprint o same jinish |
+| **Enter ↵** | Next customer — modal close + scan focus | shown.bs.modal er por armed, hidden e disarm |
+| **Inventory dekha** | Stock/batch/expiry dekhe | `GET /api/products?view=...` — server-side Iterator view |
+| **Loyalty Register** | Notun member add | `POST /api/customers` |
+| **Returns process** | Receipt lookup → line wise qty+reason → refund | `POST /api/sales/{receiptNo}/returns` → pro-rata refund, stock fire uthe |
+| **Reports (4 ta)** | Daily sales, best sellers, low stock, expiry | `GET /api/reports/{key}` — Template Method + CSV download |
+| **Alerts** | Feed dekha, mark read | `GET /api/alerts`, `POST /api/alerts/{id}/read` |
+
+**Cashier ER KORTE PARBE NA:** product create/edit/delete, restock, shrinkage, points
+adjust, promotion change, PO/supplier, void, sales history, day close, staff, finance
+report — button nijei dekhabe na, URL/api diye dileo **server 403** dey.
+
+### 24.4 MANAGER er beshi ja pabe (cashier er upor)
+
+| Option | Ki kaj | Bhitore kivabe chole |
+|---|---|---|
+| **Dashboard** | Aajker 6 KPI (net, basket, VAT, cash, low stock, expiry) | `GET /api/reports/dashboard` — same Iterator/repo theke |
+| **Inventory — Add item** | Notun item (Factory) ba COMBO (Composite, component picker) | `POST /api/products` → ProductFactory/ComboProduct → RoleGate MANAGER |
+| **Inventory — Restock** | Stock barano batch+expiry soho | `POST /api/products/{id}/restock` → RESTOCK event → alert |
+| **Inventory — Adjust (shrinkage)** | DAMAGE/LOSS/THEFT/COUNT lekha | `POST /api/products/{id}/adjust` → SHRINKAGE event + audit |
+| **Inventory — Edit** | Naam/cost/price/reorder change | `PUT /api/products/{id}` → PRICE_CHANGE event + audit (price old→new) |
+| **Purchases (PO board)** | Draft→Submit→GRN receive→Pay→Close, cancel reason soho | State pattern — bhul transition server e block |
+| **GRN receive** | Maal elle batch+expiry+cost bosano | Stock uthhe + ExpiryWatcher check + audit PO_RECEIVED |
+| **Suppliers tab** | Distributor add (terms, contact) | `POST /api/suppliers` |
+| **Standing templates** | Save as template + Clone into draft | Prototype pattern — `POST /purchase-orders/templates` + `from-template` |
+| **Sales Explorer** | Date/status/cashier filter, receipt view/reprint | `GET /api/sales?...` (manager gate) |
+| **Void** | Receipt bure kora — reason LAGBE | `POST /api/sales/{receiptNo}/void` → Command pipeline ulta kore chole: stock/tender/points sob reverse + audit |
+| **Promotions** | Category sale/member price/coupon CRUD + toggle + tester | `POST/PUT/DELETE /api/promotions` — Strategy live, POS sathe dam change |
+| **Points adjust** | Member er points thik kora | `POST /api/customers/{id}/points/adjust` + audit |
+| **Activity Log** | Ke ki korlo sob | `GET /api/audit` — 500 cap, newest first, filter soho |
+| **Day Close (Z)** | Drawer count → variance → Z-slip print → history | `GET preview` → `POST close` (server abar nijer theke hisheb kore) |
+| **Returns history** | Sob return er list | `GET /api/returns` |
+| **Finance reports (4)** | Returns, staff perf, profit, VAT | `GET /api/reports/{key}` — role map e MANAGER |
+
+**Manager ER KORTE PARBE NA:** item **delete** (admin only), staff account manage,
+Developer Mode.
+
+### 24.5 ADMIN (malik) er beshi ja pabe (manager er upor)
+
+| Option | Ki kaj | Bhitore kivabe chole |
+|---|---|---|
+| **Inventory — Delete 🗑️** | Catalog theke item bure kora | `DELETE /api/products/{id}` — RoleGate ADMIN + **RoleGuardProxy abar check kore** (double lock) |
+| **Staff — Add staff** | Notun account (CASHIER/MANAGER/ADMIN/DEVELOPER) | `POST /api/users` → PBKDF2 hash → audit USER_CREATED |
+| **Staff — Disable/Enable** | Account block/unblock | `PUT /api/users/{id}` — disabled mane login e reject |
+| **Staff — Reset password** | Bhul password er ilaz | Same PUT — audit te "password reset" lekha thake |
+
+Malik o day close/promotions/void shob manager-er jinish korte pare (ADMIN ≥ MANAGER
+ladder e upore). **Malik Developer Mode dekhe na** — developer login lagbe.
+
+### 24.6 Same screen, alada button — nice gulo
+
+| Screen | Cashier dekhe | Manager dekhe | Admin dekhe |
+|---|---|---|---|
+| Inventory | Shudhu table | + Add/Restock/Adjust/Edit | + Delete |
+| Loyalty | + Register | + Adjust points | + Adjust points |
+| Returns | Process form | + History section | + History section |
+| Reports | 4 ta button | 8 ta button | 8 ta button |
+
+Eta **UI te hide kora na** — server e prottek button er nijer gate (`RoleGate`),
+frontend e o route-level hard gate: cashier URL e `#/dashboard` likhle toast dey
+"Your role cannot open that page" ar POS e fire jay.
+
+### 24.7 Ei security ta kivabe kaj kore (ek button click er jibon)
+
+```
+1. Login: username/password → PBKDF2 verify → 256-bit token (12h sliding)
+2. Prottek request: "Authorization: Bearer <token>" header e jay
+3. AuthFilter: token check → TokenStore theke Caller (ka? kon role?)
+   → ThreadLocal RoleContext e rakha (finally e clear — thread race nai)
+4. Controller: RoleGate.requireAtLeast(MANAGER) / requireRole(DEVELOPER)
+   → na pele 403 AccessDeniedException (JSON e clear message)
+5. Product write er khetre: RoleGuardProxy (repo er samne) ABAR check kore
+   — controller e bug thakleo data layer e block
+6. Kaaj hole: audit log e actor + action + detail jore dey
+```
+
+**3 layer security:** (1) UI te menu hide — sudhu Sundor dekhanor jonno, (2) server
+RoleGate — asol enforcement, (3) RoleGuardProxy — product data'r last line of defense.
+**Client kokhono role bale na** — role ashe server-side token theke, tai DevTools
+thereke change korleo kaj hobe na.
+
+### 24.8 Kano ei separation (viva-r 1-minute answer)
+
+- **Poisa'r khoti jekhane** (void, shrinkage, price change, promotion, day close) →
+  manager — karon duty shift sesh e manager drawer jomawala accountable
+- **Business er borо decision** (staff, item delete) → malik — ei duita pichhe fire
+  na, tai highest trust er manush
+- **Bikri'r gati slow rakhte** (POS, returns, stock dekha) → shobai — cashier ke
+  manager der wait korhte hobe na
+- **Accountability** (Activity Log) → manager+ dekhe — karon "ke ki korlo" er answer
+  malik/manager lagbe, nijer nijer upor judge shobai pashe
+- **Examiner der jonno alada duro** (Developer Mode) → developer login — business
+  staff er matha etukui bhanga lagbe na, ar developer ba business power mixed hobe na
+
+---
+
 *Ei document ta `README.md` er Bangla companion — README te English e formal details
 (setup, API table, architecture diagram) ache, ekhane business-level bujhaano.*
