@@ -1,27 +1,27 @@
-# MartFlow — Complete Project Explanation (A→Z)
+# MartFlow — সম্পূর্ণ প্রজেক্ট ব্যাখ্যা (A → Z)
 
-> Eta porar por tumi puro project ta bujhe jabe — kon screen e ki ache, kon button ki kore,
-> vitore vitore (backend e) ki hoy, ar 18 ta design pattern kothay kaj kore.
-> Terminal/UI er technical word gulo English e rekhechi karon code e sei name ache —
-> match kore dekhte sohoj hobe.
+> এটা পড়লে তুমি গোটা প্রজেক্টটা বুঝে যাবে — কোন স্ক্রিনে কী আছে, কোন বাটন কী করে,
+> ভেতরে ভেতরে (backend-এ) কী হয়, আর ১৮টা design pattern কোথায় কাজ করে।
+> Terminal/UI-র টেকনিক্যাল শব্দগুলো English-এই রেখেছি কারণ কোডে সেই নামগুলোই আছে —
+> মিলিয়ে দেখতে সহজ হবে।
 
 ---
 
-## 1. Project ta asole ki? (ek paragraph e)
+## 1. প্রজেক্টটা আসলে কী? (এক প্যারাগ্রাফে)
 
-**MartFlow** ekta **Supershop Retail Management Suite** — mane Bangladeshi supershop
-(Shwapno / Meena Bazar / Unimart class er dokan) er **puro business** chalano er software.
-Ekta supershoper daily jinish gulo: **bikri (POS)**, **stock (Inventory)**, **maal kena
-(Purchasing)**, **loyalty points**, **return/refund**, **report (profit, VAT)** — sob ek
-system e. Customer jar — supershoper **malik (admin), manager, ar cashier** — 3 jon alada
-alada power diye eita use kore.
+**MartFlow** একটা **Supershop Retail Management Suite** — মানে বাংলাদেশি সুপারশপ
+(Shwapno / Meena Bazar / Unimart ক্লাসের দোকান)-এর **গোটা business** চালানোর সফটওয়্যার।
+একটা সুপারশপের ডেইলি কাজগুলো: **বিক্রি (POS)**, **স্টক (Inventory)**, **মাল কেনা
+(Purchasing)**, **loyalty points**, **return/refund**, **রিপোর্ট (profit, VAT)** — সব এক
+সিস্টেমে। আর যারা চালায় — সুপারশপের **মালিক (admin), manager, cashier** (technical
+demo-র জন্য আলাদা একটা developer account) — প্রত্যেকে আলাদা আলাদা power নিয়ে এটা ব্যবহার করে।
 
-**Porano project ta ki chilo?** Ekta e-commerce demo — jekhane kono login chilo na, role
-chilo header theke (`?as=admin` likhle admin hoye jato!), cart ta sakoler jonno common
-chilo, tax dekhato kintu charge korto na, restart dile stock haraye jeto. Egulo SOB fix
-kora hoyese — ar niche dekhabe kothay kothay.
+**আগের প্রজেক্টটা কী ছিল?** একটা e-commerce demo — যেখানে কোনো login ছিল না, role
+ছিল header থেকে (`?as=admin` লিখলেই admin হয়ে যেত!), cart-টা সবার জন্য common
+ছিল, tax দেখাত কিন্তু চার্জ করত না, restart দিলে স্টক হারিয়ে যেত। এগুলো সব fix
+করা হয়েছে — আর নিচে দেখাবে কোথায় কোথায়।
 
-**Kivabe chalabe:**
+**কীভাবে চালাবে:**
 
 ```powershell
 .\mvnw.cmd spring-boot:run
@@ -30,440 +30,440 @@ kora hoyese — ar niche dekhabe kothay kothay.
 
 **Login (demo account):**
 
-| Username | Password | Ke? | Ki ki pabe? |
+| Username | Password | কে? | কী কী পাবে? |
 |---|---|---|---|
-| `admin` | `admin123` | Malik (Owner) | Sob kichu + Staff account manage |
+| `admin` | `admin123` | মালিক (Owner) | সবকিছু + Staff account manage |
 | `manager` | `manager123` | Floor Manager | Catalog edit, Purchasing, Finance report, Void, Day Close, Activity Log |
-| `cashier` | `cashier123` | Cashier (till operator) | Billing, Return, Inventory dekha, operational report |
-| `developer` | `developer123` | Developer | Cashier er screen + **Developer Mode** (pattern/API/diagnostics) — business power NAI |
+| `cashier` | `cashier123` | Cashier (till operator) | Billing, Return, Inventory দেখা, operational report |
+| `developer` | `developer123` | Developer | Cashier-এর স্ক্রিন + **Developer Mode** (pattern/API/diagnostics) — business power নেই |
 
-> Login page e 4 ta **demo chip** button ache — click korle auto username/password bore
-> diye login hoye jay. Upore **theme toggle** button (chand/tapur icon) diye dark ↔ light
-> mode change kora jay. Browser tab e MartFlow er **favicon** (sobuj dokaan) dekha jay.
+> Login পেজে ৪টা **demo chip** বাটন আছে — ক্লিক করলে auto username/password বসে
+> যায়ে সোজা login হয়ে যায়। উপরে **theme toggle** বাটন (চাঁদ/তাপুর আইকন) দিয়ে dark ↔ light
+> মোড বদলানো যায়। Browser tab-এ MartFlow-র **favicon** (সবুজ দোকান) দেখা যায়।
 
-**Login er por ki hoy (backend e):** password ta **PBKDF2 hash** er sathe match hoy
-(plaintext kothao save nei). Thik thakle ekta **random token** toiri hoy (32 byte), sei
-token browser er localStorage e thake, ar por er sob request e `Authorization: Bearer
-<token>` header e jay. Server e **AuthFilter** sei token check kore, kon user seta
-**RoleContext** (ekta ThreadLocal) e rakhre — ei jaygay thekei sob role check hoy.
-Token 12 ghonta idle thakle expire.
-
----
-
-## 2. Navbar (upor er bar) — ki ki ache
-
-Login er por upore navbar dekhbe:
-
-- **MartFlow** brand (click korle POS e jay)
-- **Menu gulo** — **role onujayi alada alada** dekhabe:
-  - Cashier dekhbe: POS · Inventory · Loyalty · Returns · Reports · Alerts
-  - Manager er kache extra: **Dashboard · Purchases · Sales Explorer · Promotions · Activity Log · Day Close**
-  - Admin er kache extra: **Staff**
-  - Developer dekhbe: cashier er screen gulo + **Developer Mode** — manager/admin/cashier
-    Developer Mode kokhono dekhbe na (server side e exact role check)
-  - (Mane cashier konobhabe finance report ba purchasing dekhte parbe na — eta server
-    side e enforced, sudhu hide kora na!)
-- **Bell icon 🔔** — unread alert count (red badge). Prati 8 second e auto-refresh hoy.
-- **User chip** — kon user logged in + role
-- **Log out** button
+**Login-এর পর কী হয় (backend-এ):** password-টা **PBKDF2 hash**-এর সাথে match হয়
+(plaintext কোথাও save নেই)। ঠিক থাকলে একটা **random token** তৈরি হয় (৩২ byte), সেই
+token browser-এর localStorage-এ থাকে, আর পরের সব request-এ `Authorization: Bearer
+<token>` header হয়ে যায়। Server-এ **AuthFilter** সেই token check করে, কোন user সেটা
+**RoleContext** (একটা ThreadLocal)-এ রাখে — এই জায়গা থেকেই সব role check হয়।
+Token ১২ ঘণ্টা idle থাকলে expire হয়।
 
 ---
 
-## 3. POS — New Bill (bikri er main screen)
+## 2. Navbar (উপরের বার) — কী কী আছে
 
-Ei screen ta **cashier er daily haturi**. Duita bhaag: bam dike item khonjha, dan dike bill.
+Login-এর পর উপরে navbar দেখবে:
 
-### Bam dike
+- **MartFlow** brand (ক্লিক করলে POS-এ যায়)
+- **মেনুগুলো** — **role অনুযায়ী আলাদা আলাদা** দেখাবে:
+  - Cashier দেখবে: POS · Inventory · Loyalty · Returns · Reports · Alerts
+  - Manager-এর কাছে extra: **Dashboard · Purchases · Sales Explorer · Promotions · Activity Log · Day Close**
+  - Admin-এর কাছে extra: **Staff**
+  - Developer দেখবে: cashier-এর স্ক্রিনগুলো + **Developer Mode** — manager/admin/cashier
+    Developer Mode কখনোই দেখবে না (server side-এ exact role check)
+  - (মানে cashier কোনোভাবেই finance report বা purchasing দেখতে পারবে না — এটা server
+    side-এ enforced, শুধু hide করা না!)
+- **Bell icon 🔔** — unread alert count (লাল badge)। প্রতি ৮ সেকেন্ডে auto-refresh হয়।
+- **User chip** — কোন user logged in + role
+- **Log out** বাটন
 
-| Element | Ki kaj kore |
+---
+
+## 3. POS — New Bill (বিক্রির মেইন স্ক্রিন)
+
+এই স্ক্রিনটা **cashier-এর ডেইলি হাতুড়ি**। দুইটা ভাগ: বাম দিকে item খোঁজা, ডান দিকে bill।
+
+### বাম দিকে
+
+| Element | কী কাজ করে |
 |---|---|
-| **Scan box** (boro input) | Barcode scanner ei box e **digit type kore Enter** pressed kore — 6+ digit hole server e barcode lookup hoy (jemon `8941234500011` = Teer Oil 5L), item bill e add hoye jay. Bar na dile **item er naam** likhe Enter — match hole add. **F2** chaple ei box e focus ashe (real POS er moto) |
-| **Search dropdown** | Naam likhle niche 8 ta porjonto suggestion ashe — click korle add hoy |
-| **Category chips** | All / Staples / Fresh / Grocery / Dairy / Beverages / Snacks / Toiletries / Personal Care / Household — filter kore quick grid dekhay |
-| **Quick-pick grid** | 24 ta item tile — naam, price, "per kg" label (weighed item er jonno). **Ek click e bill e add** hoy (fast-moving item er jonno) |
+| **Scan box** (বড় input) | Barcode scanner এই box-এ **digit type করে Enter** চাপে — ৬+ digit হলে server-এ barcode lookup হয় (যেমন `8941234500011` = Teer Oil 5L), item bill-এ যোগ হয়ে যায়। Barcode না দিলে **item-এর নাম** লিখে Enter — match করলে add হয়। **F2** চাপলে এই box-এ focus আসে (আসল POS-এর মতো) |
+| **Search dropdown** | নাম লিখলে নিচে ৮টা পর্যন্ত suggestion আসে — ক্লিক করলে add হয় |
+| **Category chips** | All / Staples / Fresh / Grocery / Dairy / Beverages / Snacks / Toiletries / Personal Care / Household — filter করে quick grid দেখায় |
+| **Quick-pick grid** | ২৪টা item tile — নাম, price, "per kg" label (weighed item-এর জন্য)। **এক ক্লিকেই bill-এ add** হয় (fast-moving item-এর জন্য) |
 
-**Weighed item** (aalu, maach, peyaj — ja kg te bikri hoy) add korle ekta **prompt ashe
-weight likhar jonno** (jemon `1.25`). Bill e `Potato 1.25kg` hishebe ashe, dam =
-1.25 × per-kg price.
+**Weighed item** (আলু, মাছ, পেঁয়াজ — যা kg-তে বিক্রি হয়) add করলে একটা **prompt আসে
+ওজন লেখার জন্য** (যেমন `1.25`)। Bill-এ `Potato 1.25kg` হিসেবে আসে, দাম =
+1.25 × per-kg price।
 
-### Dan dike — Current Bill
+### ডান দিকে — Current Bill
 
-| Element | Ki kaj kore |
+| Element | কী কাজ করে |
 |---|---|
-| **Bill line gulo** | Prottek line e: item naam, quantity/weight, dam, "VAT 15% incl." ba "VAT-free" note, ar promotion save korle `saved BDT X` (sobuj) |
-| **– / + button** | Quantity kom/beshi (weighed item e 0.25 step e) |
-| **✏️ pencil** | Weighed line er weight directly change |
-| **🗑️ delete** | Line muchhe dey |
-| **Undo (n)** | **Memento pattern!** Last kaj ta undo kore — mis-scan hole ek click e thik. 10 porjonto undo rake |
-| **✕ clear** | Puro bill clear |
-| **Attach button** | Loyalty customer lagay (list theke choose koro) — lagatei **member price (5% off)** automatically e nite shuru kore, ar points track hoy |
-| **Coupon button** | Coupon code dibe (jemon `SAVE50` = 50 taka off, `WELCOME10` = 10% off) — bhul code dile tender er somoy error dibe |
-| **Bags/Delivery** | Koto bag (priti 5 taka) + delivery charge set kora |
-| **Totals** | Gross → Promotions (−) → Coupon (−) → fees (+) → **PAYABLE** (boro sobuj) + "incl. VAT" |
-| **Take payment button** | Payment modal khule |
+| **Bill-এর line গুলো** | প্রতিটা line-এ: item-এর নাম, quantity/ওজন, দাম, "VAT 15% incl." বা "VAT-free" নোট, আর promotion সেভ করলে `saved BDT X` (সবুজ) |
+| **– / + বাটন** | Quantity কম/বেশি (weighed item-এ 0.25 ধাপে) |
+| **✏️ pencil** | Weighed line-এর ওজন সরাসরি বদলানো যায় |
+| **🗑️ delete** | Line মুছে দেয় |
+| **Undo (n)** | **Memento pattern!** শেষ কাজটা undo করে — mis-scan হলে এক ক্লিকে ঠিক। ১০ পর্যন্ত undo রাখে |
+| **✕ clear** | পুরো bill মুছে ফেলা |
+| **Attach বাটন** | Loyalty customer লাগায় (list থেকে বাছো) — লাগানোমাত্র **member price (5% off)** নিতে শুরু করে, আর points track হয় |
+| **Coupon বাটন** | Coupon code দাও (যেমন `SAVE50` = ৫০ টাকা off, `WELCOME10` = 10% off) — ভুল code দিলে tender-এর সময় error দেবে |
+| **Bags/Delivery** | কত bag (প্রতিটা ৫ টাকা) + delivery charge সেট করা |
+| **Totals** | Gross → Promotions (−) → Coupon (−) → fees (+) → **PAYABLE** (বড় সবুজ) + "incl. VAT" |
+| **Take payment বাটন** | Payment modal খোলে |
 
 ### Take Payment modal
 
-- Prottek row e: **payment type** (CASH / CARD / BKASH / NAGAD / POINTS) + **amount**
-- **Split payment** — ekadhik method e vaag kore dite paro (jemon 500 cash + 300 bKash)
-- Niche live: **Tendered** (koto nilam) ar **Change** (koto ferte hobe) — red hole kom nilam
-- **POINTS type** dile loyalty points tender hishebe kaj kore (1 point = 1 taka) — customer
-  attached thaka lagbe
-- **Complete sale** chaplei **backend e magic ta hoy** ( niche section 4 e detail )
+- প্রতিটা row-তে: **payment type** (CASH / CARD / BKASH / NAGAD / POINTS) + **amount**
+- **Split payment** — একাধিক method-এ ভাগ করে দেওয়া যায় (যেমন ৫০০ cash + ৩০০ bKash)
+- নিচে live: **Tendered** (কত নিলাম) আর **Change** (কত ফেরত দিতে হবে) — লাল হলে কম নিলাম
+- **POINTS type** দিলে loyalty points tender হিসেবে কাজ করে (১ point = ১ টাকা) — customer
+  attached থাকা লাগবে
+- **Complete sale** চাপলেই **backend-এ জাদুটা হয়** (নিচে সেকশন ৪-এ ডিটেইল)
 
-### Receipt (bill er print)
+### Receipt (bill-এর প্রিন্ট)
 
-Sale complete hole receipt modal ashe: receipt number (`MF-20260815-003` format —
-`MF-` + date + serial), cashier naam, sob line, discount/coupon, **Round Off** (cash
-thakle poisha round kore whole taka), NET PAYABLE, VAT breakdown, payment gulo +
-transaction id, Change. **Print** button e thermal-receipt style print hoy. **Next
-customer** dile bill already clear hoye ase.
+Sale complete হলে receipt modal আসে: receipt number (`MF-20260815-003` ফরম্যাট —
+`MF-` + date + serial), cashier-এর নাম, সব line, discount/coupon, **Round Off** (cash
+হলে পয়সা round করে whole টাকা), NET PAYABLE, VAT breakdown, payment গুলো +
+transaction id, Change। **Print** বাটনে thermal-receipt style print হয়। **Next
+customer** দিলে bill আগেই clear হয়ে আসে — আর **Enter ↵** চাপলেও একই কাজ (modal বন্ধ + scan box-এ focus)।
 
 ---
 
-## 4. Ekta sale er purochondo lifecycle (vitorer kahini)
+## 4. একটা sale-এর পূর্ণ জীবনচক্র (ভেতরের কাহিনী)
 
-Eita **sobcheye important section** — sir jiggesa korle "sale ta kivabe hoy?" er jawab:
+এটাই **সবচেয়ে গুরুত্বপূর্ণ সেকশন** — স্যার জিজ্ঞাসা করলে "sale-টা কীভাবে হয়?" এর জবাব:
 
 ```
 Scan/Click
    │
    ▼
-1. BillableItem snapshot toiri — item er naam, SKU, price, VAT rate, COST
-   ei moment ei copy hoy (pore dam bere geleo purano receipt er dam change hobe na)
+1. BillableItem snapshot তৈরি — item-এর নাম, SKU, price, VAT rate, COST
+   এই মুহূর্তেই copy হয়ে যায় (পরে দাম বেড়ে গেলেও পুরনো receipt-এর দাম বদলাবে না)
    │
    ▼
-2. Totals compute — PromotionEngine (Strategy pattern) prottek line e check kore:
-   active Category Sale ache? (jemon Beverages 10%) → nao
-   na hole customer attached + Member Price active? → 5% nao
-   na hole Regular price
-   + Coupon validate + carry bag/delivery fee jog
+2. Totals compute — PromotionEngine (Strategy pattern) প্রতিটা line-এ check করে:
+   active Category Sale আছে? (যেমন Beverages 10%) → নাও
+   না হলে customer attached + Member Price active? → 5% নাও
+   না হলে Regular price
+   + Coupon validate + carry bag/delivery fee যোগ
    │
    ▼
-3. "Complete sale" chaple — VALIDATION CHAIN (Chain of Responsibility) 6 ta rule
-   sequence e check: bill khali? → weight thik? → stock ache? (same item 2 line
-   hole jog kore check!) → coupon valid? → POINTS hole customer ache? →
-   tender ⊇ total?  → PROTHOM bhul ta paisi message dey, r shamne jay na
+3. "Complete sale" চাপলে — VALIDATION CHAIN (Chain of Responsibility) ৬টা নিয়ম
+   sequence-এ check করে: bill খালি? → ওজন ঠিক? → stock আছে? (একই item ২ line-এ
+   হলে যোগ করে check!) → coupon valid? → POINTS হলে customer আছে? →
+   tender ⊇ total?  → প্রথম ভুলটা পেলেই message দেয়, আর সামনে যায় না
    │
    ▼
-4. COMMAND PIPELINE (Command pattern) — 4 dhap, ekta fails hole SAB reverse:
-   ① ReserveStock — stock komiye DB te save
-   ② ChargeTender — prottek payment channel e charge (Card decline korle STOP!)
-   ③ AwardPoints — customer e points add (100 taka e 1 point)
-   ④ CreateSale — puro sale ta snapshot hishebe DB te save
-   ↳ kono ekta fail hole: undhora ulta kore rollback — stock fire, points fire,
-     sale save hoy na. (Card declined = dokan e kichu hoy nai!)
+4. COMMAND PIPELINE (Command pattern) — ৪ ধাপ, একটা fail হলে সব উল্টো যায়:
+   ① ReserveStock — stock কমিয়ে DB-তে save
+   ② ChargeTender — প্রতিটা payment channel-এ charge (Card decline করলে থাম!)
+   ③ AwardPoints — customer-এ points add (১০০ টাকায় ১ point)
+   ④ CreateSale — পুরো sale-টা snapshot হিসেবে DB-তে save
+   ↳ কোনো একটা fail হলে: ধারা উল্টো করে rollback — stock ফেরত, points ফেরত,
+     save হয় না। (Card declined = দোকানে কিছুই হয়নি!)
    │
    ▼
-5. Receipt toiri + bill clear → next customer
+5. Receipt তৈরি + bill clear → পরের customer
 ```
 
-**Cash rounding:** cash thakle payable whole taka te round hoy (`223.75 → 224`,
-Round Off `+0.25` receipt e dekhay). Card/bKash e rounding hoy na.
+**Cash rounding:** cash থাকলে payable whole টাকায় round হয় (`223.75 → 224`,
+Round Off `+0.25` receipt-এ দেখায়)। Card/bKash-এ rounding হয় না।
 
-**Receipt restart er por o same:** sale er prottek line **self-contained snapshot** —
-Mongo theke reload kore o exact same receipt print hoy (dam, VAT, decoration sob).
+**Receipt restart-এর পরেও একই:** sale-এর প্রতিটা line **self-contained snapshot** —
+Mongo থেকে reload করেও exact একই receipt print হয় (দাম, VAT, decoration সব)।
 
 ---
 
 ## 5. Dashboard (manager/admin)
 
-Aajker (Dhaka time onujayi) business er **health card** — 6 ta KPI tile:
+আজকের (Dhaka time অনুযায়ী) business-এর **health card** — ৬টা KPI tile:
 
-| Tile | Meaning |
+| Tile | মানে কী |
 |---|---|
-| **Net Sales (today)** | Aajker total bikri (VOIDED bad) + koto bill |
-| **Average Basket** | Gromoto customer koto taka'ro mall nilam + total unit |
-| **Output VAT (today)** | Aaj NBR er jonno joto VAT collected |
-| **Cash in Drawer** | Cash tender hishebe koto taka nilam |
-| **Low Stock Items** | Reorder level er niche/niche koto item (danger!) |
-| **Expiring ≤14 days** | Koto item er batch 14 din er modhe expire hobe |
+| **Net Sales (today)** | আজকের মোট বিক্রি (VOIDED বাদে) + কতটা bill |
+| **Average Basket** | গড়ে কোনো customer কত টাকার মাল নিল + total unit |
+| **Output VAT (today)** | আজ NBR-এর জন্য যত VAT collected |
+| **Cash in Drawer** | Cash tender হিসেবে কত টাকা নিলাম |
+| **Low Stock Items** | Reorder level-এর নিচে/নিচে কত item (বিপদ!) |
+| **Expiring ≤14 days** | কত item-এর batch ১৪ দিনের মধ্যে expire হবে |
 
-Niche: quick report links + **latest alerts feed**.
+নিচে: quick report link + **latest alerts feed**।
 
 ---
 
-## 6. Inventory (stock er screen)
+## 6. Inventory (স্টকের স্ক্রিন)
 
-### Filters (upore)
+### Filter (উপরে)
 
-- **View dropdown**: `All items` / `In stock` / `Low stock` / `Expiring ≤14d` — egulo
-  **server-side Iterator** diye filter hoy (report ar live view same iterator use kore
-  tai kokhono mismatch hobe na)
-- **Category dropdown**: category onujayi filter (VAT % soho dekhay)
-- **Search**: naam / SKU / barcode diye
+- **View dropdown**: `All items` / `In stock` / `Low stock` / `Expiring ≤14d` — এগুলো
+  **server-side Iterator** দিয়ে filter হয় (report আর live view একই iterator ব্যবহার
+  করে, তাই কখনো mismatch হবে না)
+- **Category dropdown**: category অনুযায়ী filter (VAT %-সহ দেখায়)
+- **Search**: নাম / SKU / barcode দিয়ে
 
-### Table er column gulo
+### Table-এর column গুলো
 
-| Column | Ki |
+| Column | কী |
 |---|---|
-| Item | Naam + SKU + barcode |
+| Item | নাম + SKU + barcode |
 | Type | `UNIT` (piece/pack) / `WEIGHED` (kg) / `COMBO` (hamper) badge |
-| Category | Category + tar VAT rate |
-| Cost | Koto dam e kena hoyse (profit er base) |
-| Price | MRP ba per-kg price |
-| Stock | Stock — **red + bold jodi low stock** hoy |
-| Reorder | Reorder level (ei niche namle alert) |
+| Category | Category + তার VAT rate |
+| Cost | কত দামে কেনা হয়েছে (profit-এর ভিত্তি) |
+| Price | MRP বা per-kg price |
+| Stock | স্টক — **লাল + bold যদি low stock** হয় |
+| Reorder | Reorder level (এর নিচে নামলেই alert) |
 | Batches | Batch number → expiry date |
-| Actions | Niche dekho |
+| Actions | নিচে দেখো |
 
-### Manager er button gulo (cashier sudhu dekhe, chapte pare na)
+### Manager-এর বাটনগুলো (cashier শুধু দেখে, চাপতে পারে না)
 
-| Button | Ki kore |
+| Button | কী করে |
 |---|---|
-| **➕ Restock** | Manual stock ana — qty + optional batch no + expiry. GRN chara haste-haste stock dile ekhane |
-| **➖ Adjust** | **Shrinkage** — DAMAGE / LOSS / THEFT / COUNT reason soho stock komano (ba negative quantity diye barano). Eta korle ekta SHRINKAGE alert o uthe — wastage track hoy |
-| **✏️ Edit** | Naam, cost, price, reorder level change — **price change korle PRICE_CHANGE alert** fire hoy |
-| **🗑️ Delete** | Catalog theke muchhe dey — **shudhu admin (malik) pare** |
-| **Add item** | Notun item: type (UNIT/WEIGHED/COMBO), unit (PIECE/PACK/KG/LITRE), category, cost, MRP ba per-kg, stock, reorder, barcode, SKU |
+| **➕ Restock** | Manual stock আনা — qty + optional batch no + expiry। GRN ছাড়া তাড়াহুড়ায় stock দিলে এখানে |
+| **➖ Adjust** | **Shrinkage** — DAMAGE / LOSS / THEFT / COUNT কারণসহ stock কমানো (বা negative quantity দিয়ে বাড়ানো)। এটা করলে একটা SHRINKAGE alert-ও ওঠে — wastage track হয় |
+| **✏️ Edit** | নাম, cost, price, reorder level বদল — **price change করলে PRICE_CHANGE alert** ওঠে |
+| **🗑️ Delete** | Catalog থেকে মুছে দেয় — **শুধু admin (মালিক) পারে** |
+| **Add item** | নতুন item: type (UNIT/WEIGHED/COMBO), unit (PIECE/PACK/KG/LITRE), category, cost, MRP বা per-kg, stock, reorder, barcode, SKU |
 
-> **Add item e Factory Method kaj kore:** tumi type bachao, factory (UnitProductFactory /
-> WeighedProductFactory) thik object baniye dey — kg item ke piece baniye deyar bhul
-> kokhono hobe na.
+> **Add item-এ Factory Method কাজ করে:** তুমি type বাছো, factory (UnitProductFactory /
+> WeighedProductFactory) ঠিক অবজেক্ট বানিয়ে দেয — kg item-কে piece বানিয়ে দেওয়ার ভুল
+> কখনোই হবে না।
 
 ---
 
-## 7. Purchases (maal kena — manager/admin)
+## 7. Purchases (মাল কেনা — manager/admin)
 
-3 ta tab:
+৩টা tab:
 
 ### Tab 1: Purchase Orders
 
-Supervisor theke maal anar puro cycle. Ekta PO er **state machine**:
+Supplier-এর কাছ থেকে মাল আনার পূর্ণ cycle। একটা PO-র **state machine**:
 
 ```
 DRAFT → ORDERED → PARTIALLY_RECEIVED → RECEIVED → CLOSED
    │        │             │
-   └────────┴─────────────┴────────→ CANCELLED (reason lagbe)
+   └────────┴─────────────┴────────→ CANCELLED (কারণ লাগবে)
 ```
 
-| Button (state onujayi dekhay) | Ki kore |
+| Button (state অনুযায়ী দেখায়) | কী করে |
 |---|---|
-| **New draft PO** | Supplier + item list (product + qty) → DRAFT toiri |
-| **Submit to supplier** | DRAFT → ORDERED (order ta supplier k diyam) |
-| **Receive goods (GRN)** | **Sobcheye important!** Truk ele per line e: koto elo + batch no + expiry + unit cost likho → stock shelf e uthre (batch soho), item er cost update hoy, state auto: sob ele `RECEIVED`, kichu ele `PARTIALLY_RECEIVED`. Beshi receive korle reject kore |
-| **Record payment** | Supplier koto taka dilaam (instalments kore kore dite paro) — payables komte komte |
-| **Close PO** | RECEIVED → CLOSED (cycle sesh) |
-| **Cancel** | Reason soho cancel (maal asar age) |
+| **New draft PO** | Supplier + item list (product + qty) → DRAFT তৈরি |
+| **Submit to supplier** | DRAFT → ORDERED (order-টা supplier-কে দেওয়া হলো) |
+| **Receive goods (GRN)** | **সবচেয়ে গুরুত্বপূর্ণ!** ট্রাক এলে প্রতিটা line-এ: কত এলো + batch no + expiry + unit cost লেখো → স্টক shelf-এ ওঠে (batch-সহ), item-এর cost update হয়, state auto: সব এলে `RECEIVED`, কিছু এলে `PARTIALLY_RECEIVED`। বেশি receive করলে reject করে |
+| **Record payment** | Supplier-কে কত টাকা দিলাম (কিস্তিতে দেওয়া যায়) — payables কমতে কমতে শূন্য |
+| **Close PO** | RECEIVED → CLOSED (cycle শেষ) |
+| **Cancel** | কারণসহ cancel (মাল আসার আগে) |
 
-**Payables** column = ordered total − koto pay kora. Ei gulo'i "supplier er kache koto
-baki" — dokandar er jonno life-saver number.
+**Payables** column = ordered total − কত pay করা। এগুলোই "supplier-এর কাছে কত
+বাকি" — দোকানদারের জন্য life-saver নম্বর।
 
 ### Tab 2: Suppliers
 
-Distributor der list (naam, contact, phone, **payment terms** jemon "Net 15" = 15 din
-baki, address) + **Add supplier**.
+Distributor-দের list (নাম, contact, phone, **payment terms** যেমন "Net 15" = ১৫ দিন
+বাকি, address) + **Add supplier**।
 
 ### Tab 3: Standing Templates
 
-**Prototype pattern er asol use:** weekly restock list ekbar template kore rakho
-(jemon "Weekly Staples Restock": 12 oil + 8 chaal + 10 lobon + 15 chini) — tarpor
-**"Clone into draft"** button e ek click e notun DRAFT PO toiri (prottek bar 15 item
-abar abar select korte hobe na). Clone ta original theke **fully independent** —
-ekta clone receive korle onnota affect hoy na.
+**Prototype pattern-এর আসল ব্যবহার:** weekly restock list একবার template করে রাখো
+(যেমন "Weekly Staples Restock": ১২ তেল + ৮ চাল + ১০ লবণ + ১৫ চিনি) — তারপর
+**"Clone into draft"** বাটনে এক ক্লিকেই নতুন DRAFT PO তৈরি (প্রতিবার ১৫টা item
+আবার আবার select করতে হবে না)। Clone-টা original থেকে **fully independent** —
+একটা clone receive করলে অন্যটায় প্রভাব পড়ে না।
 
 ---
 
 ## 8. Loyalty (customers)
 
-- Sob member der list: naam, phone (unique), card no, **points**, member since
-- **Register**: naam + phone + card no
-- **Adjust points** (manager): balance thik kora
-- **Points er math:** prottek sale e `floor(net / 100)` point jome (224 taka → 2 point),
-  ar POS e **POINTS tender** hishebe 1 point = 1 taka khoroch kora jay. Void korle
-  point phire jay.
+- সব member-এর list: নাম, phone (unique), card no, **points**, member since
+- **Register**: নাম + phone + card no
+- **Adjust points** (manager): balance ঠিক করা
+- **Points-এর হিসাব:** প্রতিটা sale-এ `floor(net / 100)` point জমে (২২৪ টাকা → ২ point),
+  আর POS-এ **POINTS tender** হিসেবে ১ point = ১ টাকা খরচ করা যায়। Void করলে
+  point ফেরত চলে যায়।
 
 ---
 
 ## 9. Returns (return/exchange)
 
-- **Receipt number** likhe **Look up** (jemon `MF-20260815-001`) → oi bill er line gulo
-  ashe
-- Prottek line er shamne **return qty** + **reason** (jemon "dented can") likho
-- **Refund channel** bacho (default: original je channel e pay korsilo sei ta)
-- **Process refund** → **pro-rata refund** (2 tina 4 tina 2 ta felle 50% taka fire),
-  mall **stock e fire**, sale status → `PARTIALLY_RETURNED` ba sob felle `RETURNED`
-- Same receipt e multiple return kora jay — koto firlam ta track thake, beshi firla reject
-- **Voided receipt e return impossible**
-- **Exchange = return + notun bill** (return ta process koro, tarpor POS e notun bill)
-- Manager **Return history** o dekhe
+- **Receipt number** লিখে **Look up** (যেমন `MF-20260815-001`) → ওই bill-এর line গুলো
+  চলে আসে
+- প্রতিটা line-এর সামনে **return qty** + **reason** (যেমন "dented can") লেখো
+- **Refund channel** বাছো (default: original যে channel-এ pay করেছিল সেটা)
+- **Process refund** → **pro-rata refund** (২ টানার ৪ টানার ২টা ফেরত দিলে ৫০% টাকা ফেরত),
+  মাল **স্টকে ফেরত** যায়, sale status → `PARTIALLY_RETURNED` বা সব ফেরত দিলে `RETURNED`
+- একই receipt-এ একাধিকবার return করা যায় — কত ফেরত দেওয়া হলো সেটা track থাকে, বেশি ফেরত দিলে reject
+- **Voided receipt-এ return অসম্ভব**
+- **Exchange = return + নতুন bill** (return-টা process করো, তারপর POS-এ নতুন bill)
+- Manager **Return history**-ও দেখে
 
-**Void vs Return difference:** void = puro bill cancel (stock + points + payment sob
-reverse, manager only, reason lagbe). Return = kichu item fire (cashier pare).
+**Void আর Return-এর পার্থক্য:** void = পুরো bill বাতিল (stock + points + payment সব
+উল্টো যায়, শুধু manager, কারণ লাগে)। Return = কিছু item ফেরত (cashier পারে)।
 
 ---
 
 ## 10. Reports
 
-Upre report picker + **From/To date** + **Run** + **CSV** download button.
+উপরে report picker + **From/To date** + **Run** + **CSV** download বাটন।
 
-| Report | Ki dey | Ke dekhe |
+| Report | কী দেয় | কে দেখে |
 |---|---|---|
-| **Daily Sales** | Date onujayi: bills, gross, discount, coupon, fees, net, VAT | sobai |
-| **Best Sellers** | Sobcheye bikto item (unit count onujayi, top 15) | sobai |
-| **Low Stock** | Reorder worksheet — koto stock ache, koto order korte hobe | sobai |
-| **Expiring Batches** | 14 din er bhitore expire howa batch (EXPIRED bold) | sobai |
+| **Daily Sales** | Date অনুযায়ী: bills, gross, discount, coupon, fees, net, VAT | সবাই |
+| **Best Sellers** | সবচেয়ে বিক্রিত item (unit count অনুযায়ী, top 15) | সবাই |
+| **Low Stock** | Reorder worksheet — কত stock আছে, কত order করতে হবে | সবাই |
+| **Expiring Batches** | ১৪ দিনের ভেতরে expire হওয়া batch (EXPIRED bold) | সবাই |
 | **Returns & Refunds** | Return log + refund + reason | manager+ |
-| **Staff Performance** | Cashier onujayi: bills, units, turnover, avg basket | manager+ |
-| **Profit** | Prottek receipt er: revenue (VAT bad) vs COGS vs profit vs margin% | manager+ |
-| **VAT Summary (NBR)** | VAT rate slab onujayi taxable + output VAT — **ei ta e NBR filing er source** | manager+ |
+| **Staff Performance** | Cashier অনুযায়ী: bills, units, turnover, avg basket | manager+ |
+| **Profit** | প্রতিটা receipt-এর: revenue (VAT বাদে) vs COGS vs profit vs margin% | manager+ |
+| **VAT Summary (NBR)** | VAT rate slab অনুযায়ী taxable + output VAT — **এটাই NBR filing-এর উৎস** | manager+ |
 
-**CSV button** je kono report ke Excel-e khola file e namay — jemon accountant k pathano.
+**CSV বাটন** যেকোনো report-কে Excel-এ খোলা file-এ নামায় — যেমন accountant-কে পাঠানো।
 
-> **Template Method:** ei 8 ta report er fetch→aggregate→build flow EK jaygay
-> (`AbstractReportGenerator`) — "VOIDED kokhono revenue na" rule ekbar likha, sob jaygay kaj kore.
+> **Template Method:** এই ৮টা report-এর fetch→aggregate→build ফ্লো এক জায়গায়
+> (`AbstractReportGenerator`) — "VOIDED কখনো revenue না" নিয়ম একবার লেখা, সব জায়গায় কাজ করে।
 
 ---
 
 ## 11. Alerts (alert center)
 
-Auto-generated somoy sonttok kheyal rakhar feed — **kewu manual banay na**:
+Auto-generated সময় সংবেদনশীল খেয়াল রাখার feed — **কেউ manual বানায় না**:
 
-| Alert | Color | Kokhon uthre |
+| Alert | Color | কখন ওঠে |
 |---|---|---|
-| **LOW_STOCK** | red | Stock reorder level cross kore namle + **reorder suggestion** message o ashe |
-| **EXPIRY_SOON** | yellow | Batch 14 din er bhitore expire hole (boot e + GRN te check) |
-| **SHRINKAGE** | red | Damage/loss/theft write-off korle |
-| **RESTOCK** | green | Stock barle |
-| **PRICE_CHANGE** | green | MRP change korle |
+| **LOW_STOCK** | লাল | Stock reorder level ছাড়িয়ে নামলে + **reorder suggestion** message-ও আসে |
+| **EXPIRY_SOON** | হলুদ | Batch ১৪ দিনের ভেতরে expire হলে (boot-এ + GRN-তে check) |
+| **SHRINKAGE** | লাল | Damage/loss/theft write-off করলে |
+| **RESTOCK** | সবুজ | Stock বাড়লে |
+| **PRICE_CHANGE** | সবুজ | MRP বদলালে |
 
-"unread only" toggle, **Mark read** button, refresh. Navbar er bell e unread count.
+"unread only" toggle, **Mark read** বাটন, refresh। Navbar-এর bell-এ unread count।
 
 ---
 
-## 12. Staff (admin only)
+## 12. Staff (শুধু admin)
 
-- Sob staff account: username, naam, role badge, active, since
-- **Add staff**: username + naam + role (CASHIER/MANAGER/ADMIN/**DEVELOPER**) + password (6+ char)
-- **Disable/Enable**: account block/unblock (disabled login korte parbe na)
+- সব staff account: username, নাম, role badge, active, since
+- **Add staff**: username + নাম + role (CASHIER/MANAGER/ADMIN/**DEVELOPER**) + password (৬+ char)
+- **Disable/Enable**: account ব্লক/আনব্লক (disabled হলে login করতে পারবে না)
 - **Reset password**
 
 ---
 
 ## 13. Sales Explorer (manager/admin)
 
-Manager er receipt khoja-r screen — age void backend e chilo UI chilo na, ekhon sob ase:
+Manager-এর receipt খোঁজার স্ক্রিন — আগে void backend-এ ছিল কিন্তু UI ছিল না, এখন সব আছে:
 
 - **Filter**: from/to date, status (COMPLETED/PARTIALLY_RETURNED/RETURNED/VOIDED), cashier
 - **Table**: receipt no, date, cashier, status badge, net, VAT
-- **👁 View** — receipt modal khule (print/copy/save sob kaj kore — POS er receipt er
-  same component, reprint mane FREE)
-- **🚫 Void** — reason lekha LAGBE (textarea), confirm korle: stock fire uthe, tender
-  refund, points reverse, status VOIDED. Audit log eo entry jay
-- Void korle inventory te stock abar bere jay — Dashboard eo net theke baad jay
+- **👁 View** — receipt modal খোলে (print/copy/save সব কাজ করে — POS-এর receipt-এর
+  একই component, reprint মানে ফ্রি)
+- **🚫 Void** — reason লেখা **লাগবেই** (textarea), confirm করলে: stock ফেরত ওঠে, tender
+  refund, points উল্টো, status VOIDED। Audit log-এও entry যায়
+- Void করলে inventory-তে stock আবার বেড়ে যায় — Dashboard-এও net থেকে বাদ যায়
 
 ## 14. Promotions (manager/admin)
 
-Age promotion shudhu seed data theke ashto — ekhon manager nijeriii banate pare:
+আগে promotion শুধু seed data থেকে আসত — এখন manager নিজেই বানাতে পারে:
 
-- **Table**: naam, type badge (CATEGORY_SALE/MEMBER_PRICE/COUPON_FLAT/COUPON_PERCENT),
+- **Table**: নাম, type badge (CATEGORY_SALE/MEMBER_PRICE/COUPON_FLAT/COUPON_PERCENT),
   detail (category+%, coupon code+amount), date window, ACTIVE/OFF
-- **New/Edit modal**: type select korle form change hoy (category sale → category+percent,
-  coupon → code+amount/percent). Coupon code auto-uppercase
-- **Power button** — on/off toggle (Strategy LIVE — POS e sathe sathe dam change hoy)
-- **Delete** — confirm kore muchhe
-- **Coupon tester** (nice panel): code + bill amount dile engine koto taka off dibe
-  dekhay — PromotionEngine (Strategy) ta live test!
+- **New/Edit modal**: type select করলে form বদলে যায় (category sale → category+percent,
+  coupon → code+amount/percent)। Coupon code auto-uppercase
+- **Power বাটন** — on/off toggle (Strategy LIVE — POS-এ সাথে সাথে দাম বদলায়)
+- **Delete** — confirm করে মুছে ফেলা
+- **Coupon tester** (নিচের প্যানেল): code + bill amount দিলে engine কত টাকা off দেবে
+  দেখায় — PromotionEngine (Strategy)-কে live টেস্ট!
 
 ## 15. Activity Log (manager/admin)
 
-"Ke void dilam? Ke price change korlo?" — ei question er answer. Prottek boro action er
+"কে void দিলাম? কে price change করলো?" — এই প্রশ্নের উত্তর। প্রতিটা বড় action-এর
 **audit trail**:
 
-- Ki ki record hoy: login (+ bhul password), logout, void, return, shrinkage, restock,
-  product create/edit/delete (price old→new soho), promotion CRUD, PO er sob state
+- কী কী record হয়: login (+ ভুল password), logout, void, return, shrinkage, restock,
+  product create/edit/delete (price old→new সহ), promotion CRUD, PO-র সব state
   change, template save/clone, points adjust, staff change, day close
 - **Filter**: date window, actor, action type
-- Badge color: auth = gray, void/shrinkage = red, money = yellow, catalog = blue,
-  purchasing = green-ish
-- Cashier/developer dekhte parbe na (403) — manager+ only
-- 500 entry porjonto rakhe (alert feed er moto cap) — eta shift-level trail, forensic
-  ledger na. Observer pattern use KORINAI — karon stock event e actor/intent nai;
-  javadoc e reason lekha ache (sir jiggesa korle setai bolo)
+- Badge color: auth = ধূসর, void/shrinkage = লাল, money = হলুদ, catalog = নীল,
+  purchasing = সবুজাভ
+- Cashier/developer দেখতে পারবে না (403) — শুধু manager+
+- ৫০০ entry পর্যন্ত রাখে (alert feed-এর মতো cap) — এটা shift-level trail, forensic
+  ledger না। Observer pattern ব্যবহার **করিনি** — কারণ stock event-এ actor/intent নেই;
+  javadoc-এ কারণ লেখা আছে (স্যার জিজ্ঞাসা করলে সেটাই বলো)
 
 ## 16. Day Close / Z-Report (manager/admin)
 
-Shift sheshe cash drawer milano-r screen — real supershop er daily routine:
+শিফট শেষে cash drawer মেলানোর স্ক্রিন — আসল সুপারশপের ডেইলি রুটিন:
 
-- **Window** (default aaj) load korle: Net/VAT/Bills/Expected drawer cash KPI
-- **Tenders table**: cash/card/bKash/Nagad/points koto ashe
-- **Returns + Voids section**: math ta CHOKHE DEKHA jay (viva te gold)
-- **Close the day**: drawer e jotola taka count kore likho → variance (counted − expected)
-  — 0 hole sobuj (balanced!), na hole red
-- **Print Z-slip** — thermal printer e print hoy (receipt er same printer component)
-- **History** — age kono day close korle table theke abar print kora jay
+- **Window** (default আজ) load করলে: Net/VAT/Bills/Expected drawer cash KPI
+- **Tenders table**: cash/card/bKash/Nagad/points কত আসে
+- **Returns + Voids section**: হিসাবটা **চোখে দেখা যায়** (viva-তে সোনার চামচ)
+- **Close the day**: drawer-এ যত টাকা count করে লেখো → variance (counted − expected)
+  — ০ হলে সবুজ (balanced!), না হলে লাল
+- **Print Z-slip** — thermal প্রিন্টারে প্রিন্ট হয় (receipt-এর একই printer component)
+- **History** — আগে কোনো দিন close করলে table থেকে আবার print করা যায়
 
-**Cash math (sir jiggesa korle):** `expected = cashIn − changeOut − cashRefunds − voidCashOut`
-- cashIn/changeOut = window er SHOB sale (same-window void net zero hoy)
-- voidCashOut = oi void jara EI window e refund hoise (kale kal er sale aaj void korle
-  AAJKER drawer theke taka jay — `voidedAt` field er jonno possible)
-- Revenue figure e VOIDED khabi na, cash math e rakhte hoy — duita alada set, jaate
-  farkiro na jay (javadoc e ache)
+**Cash-এর হিসাব (স্যার জিজ্ঞাসা করলে):** `expected = cashIn − changeOut − cashRefunds − voidCashOut`
+- cashIn/changeOut = window-এর সব sale (same-window void নিট শূন্য হয়)
+- voidCashOut = যেসব void-এর refund এই window-এ পড়েছে (কালকের sale আজ void করলে
+  আজকের drawer থেকে টাকা যায় — `voidedAt` field-এর জন্যই সম্ভব)
+- Revenue figure-এ VOIDED রাখি না, কিন্তু cash হিসাবে রাখতে হয় — দুইটা আলাদা সেট, যাতে
+  ঝামেলা না হয় (javadoc-এ আছে)
 
 ---
 
-## 17. Developer Mode (shudhu developer login)
+## 17. Developer Mode (শুধু developer login)
 
-**developer / developer123** diye login korlei dekha jay (onno keu na). 3 ta tab:
+**developer / developer123** দিয়ে login করলেই দেখা যায় (অন্য কেউ না)। ৩টা tab:
 
-1. **Patterns** — 18 ta card; click korle deep-dive modal: Problem → Keno ei pattern →
-   Alternative (reject ki keno) → real class + file → **asol source snippet** → kon test
-   prove kore → "See it live" (manager screen hole "manager login e dekho" hint dey)
-2. **API explorer** — sob endpoint grouped (method badge, path, min role, description)
-   + **Try it** button: param + JSON body dawa jay, nije r token e call hoy — 403 ashle
-   oita GATE kaj korche dekhano hoy (feature!)
+1. **Patterns** — ১৮টা card; ক্লিক করলে deep-dive modal: Problem → কেন এই pattern →
+   Alternative (কী reject করেছি কেন) → আসল class + file → **আসল source snippet** → কোন test
+   প্রমাণ করে → "See it live" (manager screen হলে "manager login-এ দেখো" hint দেয়)
+2. **API explorer** — সব endpoint grouped (method badge, path, min role, description)
+   + **Try it** বাটন: param + JSON body দেওয়া যায়, নিজের token-এই call হয় — 403 এলে
+   সেটা GATE কাজ করছে দেখানো হয় (এটাই feature!)
 3. **Diagnostics** — persistence mode (MONGO/IN-MEMORY), active token, alert count,
    repo count, uptime, Dhaka clock
 
-Backend theke data ashe (`/api/dev/*` — exact DEVELOPER role match, manager/admin o 403).
-**Drift guard test** ace: card e jei class/test er naam ase, source tree te ta_na thakle
-build FAIL — "ReceiptBuilder" type ghost ar hobe na. API catalog o Spring er actual
-routing er sathe match kore.
+Backend থেকে data আসে (`/api/dev/*` — exact DEVELOPER role match, manager/admin-ও 403)।
+**Drift guard test** আছে: card-এ যেই class/test-এর নাম আছে, source tree-তে তা না থাকলে
+build FAIL — "ReceiptBuilder"-টাইপের ভূত আর হবে না। API catalog-ও Spring-এর আসল
+routing-এর সাথে match করে।
 
 ---
 
-## 18. 18 ta Design Pattern — ekta jaygay, Banglish e
+## 18. ১৮টা Design Pattern — এক জায়গায়, বাংলায়
 
-| # | Pattern | Kothay (class) | Banglish e keno dorkar chilo |
+| # | Pattern | কোথায় (class) | বাংলায় কেন দরকার ছিল |
 |---|---|---|---|
-| 1 | **Singleton** | `InventoryCatalog`, `DatabaseConnection` | Puro app e stock list er EKTA copy thakte hobe — duita thakle ek machine e bikri, onnakta te stock purano = same maal 2 bar bikri! |
-| 2 | **Factory Method** | `ProductFactory` → `UnitProductFactory`, `WeighedProductFactory` | "Add item" form e tumi shudhu type bachao — factory thik class baniye dey. Na thakle if-else bhabo piece na kg |
-| 3 | **Builder** | `PurchaseOrderBuilder` | PO te onek field — step by step baniye LAST e validate kore dey. Adha-bana PO system e dhukte parbe na |
-| 4 | **Prototype** | `StandingOrderTemplate` | Weekly restock list clone kore notun DRAFT — 15 item abar abar select kora lagbe na. (Porano project e eta DEAD CODE chilo!) |
-| 5 | **Adapter** | `CashAdapter`, `CardAdapter`, `BkashAdapter`, `NagadAdapter`, `PointsAdapter` | 5 dhoroner payment er SDK alada alada shape — adapter era sob k ek `PaymentChannel` interface e ana. Notun payment add korle bill er code change lage na |
-| 6 | **Decorator** | `LineDiscount`, `CarryBagFee`, `DeliveryFee`, `RoundOffAdjustment` | Bill line er upor discount/charge JODA jay — line class gulo change kora lagbe na, joto khushi stack koro |
-| 7 | **Facade** | `MartFlowFacade`, `BillingFacade` | Controller/prontend ekta simple method laage (`tender()`) — bitorer 10 ta subsystem era handle kore |
-| 8 | **Proxy** | `RoleGuardProxy` (product repo er samne) | Cashier konoBHABE product create/delete korte parbe na — UI na, controller bug holeo na, DATA layer ei block. Security er last line |
-| 9 | **Composite** | `ComboProduct` | Eid hamper = ek item, kintu stock tar component gulor modde theke ashe — 1 hamper bikri hoile prottek component er stock komre |
-| 10 | **Observer** | `AlertService`, `ReorderSuggestionObserver`, `ExpiryWatcher` | Stock komle/expiry kale SYSTEM NIJERI alert uthre — kewu monito korte pare na |
-| 11 | **Strategy** | `RegularPrice`, `CategorySale`, `MemberPrice` + `PromotionEngine` | Manager promotion on/off kore — till er pricing CODE change hoy na. Dynamic pricing |
-| 12 | **Command** | `billing/commands/` (Reserve, Charge, AwardPoints, CreateSale) + void/return | Tender ekta choto transaction: card decline korle stock+points+sale SOB auto rollback. Ek dhap o adha thake na |
-| 13 | **Template Method** | `AbstractReportGenerator` + 8 report | Notun report = 3 ta choto method. "Voided revenue na" rule ekbar likha — 8 jaygay copy-paste na |
-| 14 | **Chain of Responsibility** | `billing/validation/` (6 handler) | Cashier EXACT first bhul ta dekhe — "stock nai, Coke er 10 lagan jay nai" type specific message |
-| 15 | **State** | `suppliers/postate/` (6 state class) | DRAFT PO konoBHABE receive kora jay na — rule state class er bitorer, if-else cholche na. CLOSED ke cancel kora jay na |
-| 16 | **Visitor** | `VatVisitor`, `ProfitVisitor`, `ReceiptFormatterVisitor` | Same bill line gulo theke VAT report + profit report + receipt format — 3 ta bhinnno kaj, ek traversal. Mongo theke load kora sale eo same math |
-| 17 | **Memento** | `BillMemento` (session er undo stack) | Cashier er Undo button — mis-scan POS e proti minute hoy. 10 step porjonto fire jaa jay |
-| 18 | **Iterator** | `InStockIterator`, `LowStockIterator`, `ExpiringSoonIterator`, `PriceRangeIterator` | "Low stock" view ar "Low stock" report SAME iterator chole — kokhono mismatch hobe na. Reset kore abar chola jay |
+| 1 | **Singleton** | `InventoryCatalog`, `DatabaseConnection` | পুরো app-এ stock list-এর একটাই copy থাকতে হবে — দুইটা থাকলে এক মেশিনে বিক্রি, অন্যটায় stock পুরনো = একই মাল ২ বার বিক্রি! |
+| 2 | **Factory Method** | `ProductFactory` → `UnitProductFactory`, `WeighedProductFactory` | "Add item" form-এ তুমি শুধু type বাছো — factory ঠিক class বানিয়ে দেয়। না থাকলে if-else ভাবতে হতো piece না kg |
+| 3 | **Builder** | `PurchaseOrderBuilder` | PO-তে অনেক field — step by step বানিয়ে শেষে validate করে। আধা-বানানো PO সিস্টেমে ঢুকতে পারবে না |
+| 4 | **Prototype** | `StandingOrderTemplate` | Weekly restock list clone করে নতুন DRAFT — ১৫টা item আবার আবার select করা লাগবে না। (আগের প্রজেক্টে এটা DEAD CODE ছিল!) |
+| 5 | **Adapter** | `CashAdapter`, `CardAdapter`, `BkashAdapter`, `NagadAdapter`, `PointsAdapter` | ৫ ধরনের payment-এর SDK আলাদা আলাদা shape — adapter সবগুলোকে এক `PaymentChannel` interface-এ আনে। নতুন payment add করলে bill-এর code change লাগে না |
+| 6 | **Decorator** | `LineDiscount`, `CarryBagFee`, `DeliveryFee`, `RoundOffAdjustment` | Bill line-এর উপর discount/charge জোড়া যায় — line class গুলো change করা লাগে না, যত খুশি stack করো |
+| 7 | **Facade** | `MartFlowFacade`, `BillingFacade` | Controller/frontend-কে একটা সিম্পল method লাগে (`tender()`) — ভেতরের ১০টা subsystem এরা handle করে |
+| 8 | **Proxy** | `RoleGuardProxy` (product repo-র সামনে) | Cashier কোনোভাবেই product create/delete করতে পারবে না — UI-তে না, controller-এ bug থাকলেও না, data layer-এই ব্লক। Security-র last line |
+| 9 | **Composite** | `ComboProduct` | Eid hamper = এক item, কিন্তু stock তার component-দের থেকে আসে — ১ hamper বিক্রি হলে প্রতিটা component-এর stock কমে |
+| 10 | **Observer** | `AlertService`, `ReorderSuggestionObserver`, `ExpiryWatcher` | Stock কমলে/expiry হলে সিস্টেম নিজেই alert তোলে — কাউকে মনিটর করতে হয় না |
+| 11 | **Strategy** | `RegularPrice`, `CategorySale`, `MemberPrice` + `PromotionEngine` | Manager promotion on/off করে — till-এর pricing CODE change হয় না। Dynamic pricing |
+| 12 | **Command** | `billing/commands/` (Reserve, Charge, AwardPoints, CreateSale) + void/return | Tender একটা ছোট transaction: card decline করলে stock+points+sale সব auto rollback। এক ধাপও আধা থাকে না |
+| 13 | **Template Method** | `AbstractReportGenerator` + ৮ report | নতুন report = ৩টা ছোট method। "Voided revenue না" নিয়ম একবার লেখা — ৮ জায়গায় copy-paste না |
+| 14 | **Chain of Responsibility** | `billing/validation/` (৬ handler) | Cashier ঠিক প্রথম ভুলটা দেখে — "stock নেই, Coke-এর ১০ লাগবে না" টাইপের specific message |
+| 15 | **State** | `suppliers/postate/` (৬টা state class) | DRAFT PO কোনোভাবেই receive করা যায় না — নিয়ম state class-এর ভেতরে, if-else চলে না। CLOSED-কে cancel করা যায় না |
+| 16 | **Visitor** | `VatVisitor`, `ProfitVisitor`, `ReceiptFormatterVisitor` | একই bill line থেকে VAT report + profit report + receipt format — ৩টা ভিন্ন কাজ, এক traversal। Mongo থেকে load করা sale-এও একই হিসাব |
+| 17 | **Memento** | `BillMemento` (session-এর undo stack) | Cashier-এর Undo বাটন — mis-scan POS-এ প্রতি মিনিটে হয়। ১০ ধাপ পর্যন্ত ফেরা যায় |
+| 18 | **Iterator** | `InStockIterator`, `LowStockIterator`, `ExpiringSoonIterator`, `PriceRangeIterator` | "Low stock" view আর "Low stock" report একই iterator চালায় — কখনো mismatch হবে না। Reset করে আবার চালানো যায় |
 
-**Ekta intelligent design decision (sir jiggesa korle bole):** sale er status plain
-enum (`COMPLETED/VOIDED/PARTIALLY_RETURNED/RETURNED`) kintu PO te full State pattern
-KENO? Karon sale er kono status e bose thakena — void/return ek instant operation,
-alada command e hoy. Kintu PO din din dhore ekta state e BOSE thake, ar prottek state e
-allowed operation alada (draft e receive jay na, closed e cancel jay na). Pattern
-business er upor base kora, syllabus er upor na.
+**একটা intelligent design decision (স্যার জিজ্ঞাসা করলে বলো):** sale-এর status plain
+enum (`COMPLETED/VOIDED/PARTIALLY_RETURNED/RETURNED`) কিন্তু PO-তে পুরো State pattern
+**কেন?** কারণ sale-এর কোনো status-এ বসে থাকে না — void/return একটা instant operation,
+আলাদা command-এ হয়। কিন্তু PO দিনের পর দিন একটা state-এ **বসে থাকে**, আর প্রতিটা state-এ
+allowed operation আলাদা (draft-এ receive যায় না, closed-এ cancel যায় না)। Pattern
+business-এর উপর base করা, syllabus-এর উপর না।
 
 ---
 
-## 19. Architecture — request ekta kivabe pochan hoy
+## 19. Architecture — একটা request কীভাবে পৌঁছায়
 
 ```
 Browser (vanilla JS SPA)
    │  fetch + Bearer token
    ▼
-AuthFilter ──── token check → RoleContext (ThreadLocal) set → finally clear
+AuthFilter ──── token check → RoleContext (ThreadLocal) set → finally-এ clear
    │
    ▼
-Controller (khub patla — 1 line e facade call)
+Controller (খুবই পাতলা — ১ লাইনে facade call)
    │
    ▼
 Facade (MartFlowFacade / BillingFacade / PurchasingService)
@@ -472,31 +472,31 @@ Facade (MartFlowFacade / BillingFacade / PurchasingService)
 Domain POJOs ──── items, decorators, validation chain, commands,
    │              promotion engine, state machine, visitors...
    ▼
-RoleGuardProxy (product repo er write gate: create=manager+, delete=admin)
+RoleGuardProxy (product repo-র write gate: create=manager+, delete=admin)
    │
    ▼
-Repository interface ──── Mongo (Atlas) thakle → MongoDB
-                          na thakle → in-memory (demo mode)
+Repository interface ──── Mongo (Atlas) থাকলে → MongoDB
+                          না থাকলে → in-memory (demo mode)
 ```
 
-**3 ta iron rule:**
+**৩টা iron rule:**
 
-1. **Domain e 100% plain Java** — kono Spring annotation nei. Spring shudhu `AppConfig`
-   (DI wiring) + controller e. Tai pattern gulo "real" — framework er jadudora na.
-2. **Taka sob jaygay `BigDecimal`** — 2 decimal, HALF_UP rounding, ekta `MoneyUtil`
-   choke point. `double` floating point e 0.1+0.2 = 0.3000000004 hoy — taka te suicide.
-3. **Somoy sob jaygay `TimeSource`** — Asia/Dhaka fixed. "Aaj" = Dhaka er aaj, server
-   jekono deshe thakuk na keno.
+1. **Domain-এ ১০০% plain Java** — কোনো Spring annotation নেই। Spring শুধু `AppConfig`
+   (DI wiring) + controller-এ। তাই pattern গুলো "আসল" — framework-এর জাদু না।
+2. **টাকা সব জায়গায় `BigDecimal`** — ২ decimal, HALF_UP rounding, একটা `MoneyUtil`
+   choke point। `double` floating point-এ 0.1+0.2 = 0.3000000004 হয় — টাকায় এটা suicide।
+3. **সময় সব জায়গায় `TimeSource`** — Asia/Dhaka fixed। "আজ" = Dhaka-র আজ, server
+   যেকোনো দেশে থাকুক না কেন।
 
-**VAT math (important):** BD te price **VAT-inclusive** (shelf e 115 taka = 100 mall +
-15 VAT). Tai VAT back-calculate hoy: `VAT = net × rate / (100 + rate)`.
-Check: 115 @ 15% → 115×15/115 = **15.00** ✓ ; 107.50 @ 7.5% → **7.50** ✓.
-Rates: Staples/Fresh 0%, Grocery/Dairy 7.5%, baki 15% — `CategoryRegistry` te policy
-hisebe ache, ek line change kore sob jaygay update hoy.
+**VAT-এর হিসাব (গুরুত্বপূর্ণ):** BD-তে price **VAT-inclusive** (shelf-এ ১১৫ টাকা = ১০০ মাল +
+১৫ VAT)। তাই VAT back-calculate হয়: `VAT = net × rate / (100 + rate)`।
+Check: 115 @ 15% → 115×15/115 = **15.00** ✓ ; 107.50 @ 7.5% → **7.50** ✓।
+Rate: Staples/Fresh 0%, Grocery/Dairy 7.5%, বাকি 15% — `CategoryRegistry`-তে policy
+হিসেবে আছে, এক লাইন change করে সব জায়গায় update হয়।
 
 ---
 
-## 20. Data model (ke ke ache, kar sathe kar somporko)
+## 20. Data model (কে কে আছে, কার সাথে কার সম্পর্ক)
 
 ```
 Product (abstract)
@@ -504,11 +504,11 @@ Product (abstract)
  ├── WeighedProduct (pricePerUnit, fractional kg stock)
  └── ComboProduct   (components[] → Composite, scarcest stock)
 
-User (username, passwordHash, role)          ← 3 role
+User (username, passwordHash, role)          ← ৩টা role + developer
 Customer (phone unique, pointsBalance)       ← loyalty
-Sale ── SaleLine[] (FULL snapshot)           ← bikri er history
+Sale ── SaleLine[] (FULL snapshot)           ← বিক্রির history
  │     └─ Tender[] (type, amount, trxId)
- └── SaleReturn[] (per line qty, reason)
+ └── SaleReturn[] (প্রতি line-এ qty, reason)
 Promotion (CATEGORY_SALE / MEMBER_PRICE / COUPON_FLAT / COUPON_PERCENT, date window)
 Supplier ── PurchaseOrder ── PurchaseOrderLine[] (orderedQty, receivedQty, unitCost)
               │                + Payment[]
@@ -516,9 +516,9 @@ Supplier ── PurchaseOrder ── PurchaseOrderLine[] (orderedQty, receivedQt
 Alert (ephemeral feed, 200 cap)
 ```
 
-**Sob kichu (products, sales, returns, customers, promotions, PO, suppliers, users)
-MongoDB te persist hoy** — restart dileo thake. Sudhu login token ar alert feed
-in-memory (restart e abar login, data hu jalbe na).
+**সবকিছু (products, sales, returns, customers, promotions, PO, suppliers, users)
+MongoDB-তে persist হয়** — restart দিলেও থাকে। শুধু login token আর alert feed
+in-memory (restart-এ আবার login, কিন্তু data হারাবে না)।
 
 ---
 
@@ -527,31 +527,31 @@ in-memory (restart e abar login, data hu jalbe na).
 ```
 src/main/java/com/martflow/
 ├── MartFlowApplication.java    ← entry point
-├── api/                        ← REST controller gulo (patla) + AuthFilter + DTO
+├── api/                        ← REST controller গুলো (পাতলা) + AuthFilter + DTO
 ├── app/                        ← AppConfig (DI wiring) + MartFlowFacade + SeedData
 ├── audit/                      ← AuditLog, AuditService (activity trail, 500 cap)
 ├── auth/                       ← User, PasswordHasher, TokenStore, AuthService
 ├── billing/                    ← Bill, BillMemento, BillingSession(+Registry),
 │   ├── item/                     UnitLine/WeighedLine/ComboLine/AdjustmentLine
 │   ├── decorator/                LineDiscount/CarryBagFee/DeliveryFee/RoundOff
-│   ├── validation/               6 handler + chain
+│   ├── validation/               ৬টা handler + chain
 │   ├── commands/                 Billing pipeline
 │   └── visitor/                  BillItemVisitor interface
 ├── catalog/                    ← Product hierarchy, Factory, InventoryCatalog,
-│   └── iter/                     4 iterators + CategoryRegistry (VAT policy)
+│   └── iter/                     ৪টা iterator + CategoryRegistry (VAT policy)
 ├── common/                     ← MoneyUtil, TimeSource, NotFoundException
-├── dev/                        ← PatternCatalog + ApiCatalog (Developer Mode data,
-│                                  drift-guarded by tests)
-├── inventory/                  ← Observer events, AlertService, ExpiryWatcher,
+├── dev/                        ← PatternCatalog + ApiCatalog (Developer Mode-র data,
+│                                  test দিয়ে drift-guarded)
+├── inventory/                  ← Observer event, AlertService, ExpiryWatcher,
 │                                  InventoryService (stock chokepoint)
 ├── loyalty/                    ← Customer, LoyaltyService
-├── payment/                    ← PaymentChannel + 5 adapter + vendor/ (fake SDKs)
-├── persistence/                ← Repository interface, Mongo/in-memory repos,
-│   └── proxy/                    mappers, RoleGuardProxy
-├── pricing/                    ← Strategy gulo + Promotion + PromotionEngine
-├── reports/                    ← AbstractReportGenerator + 8 report + CSV
+├── payment/                    ← PaymentChannel + ৫টা adapter + vendor/ (fake SDK)
+├── persistence/                ← Repository interface, Mongo/in-memory repo,
+│   └── proxy/                    mapper গুলো, RoleGuardProxy
+├── pricing/                    ← Strategy গুলো + Promotion + PromotionEngine
+├── reports/                    ← AbstractReportGenerator + ৮টা report + CSV
 │   ├── visitor/                  VatVisitor, ProfitVisitor, ReceiptFormatter
-│   └── (DayClose + DayCloseService ← Z-report, ekhanei)
+│   └── (DayClose + DayCloseService ← Z-report, এখানেই)
 ├── returns/                    ← ReturnService, SaleReturn
 ├── sales/                      ← Sale, SaleLine, ReceiptNoGenerator, SalesAdminService
 ├── security/                   ← Role, Caller, RoleContext (ThreadLocal), RoleGate
@@ -559,226 +559,230 @@ src/main/java/com/martflow/
     └── postate/                  State machine + StandingOrderTemplate (Prototype)
 
 src/main/resources/static/      ← frontend (index.html, css/, js/ — views, router, api)
-src/test/java/com/martflow/     ← 24 ta test class → 136 tests
+src/test/java/com/martflow/     ← ২৪টা test class → ১৬৭ test
 ```
 
 ---
 
-## 22. Sir er samne 10 minute er demo script
+## 22. স্যারের সামনে ১০ মিনিটের demo script
 
-1. **Login** — cashier chip e click. "4 role, real password, PBKDF2 hash"
-2. **POS** — barcode scan (box e `8941234500011` + Enter) → Teer oil bill e.
-   Aalu tile click → weight prompt 1.25 → weighed billing dekhao
-3. **Attach customer** — 01711111111 (Nusrat) → 5% member discount LIVE namte dekhao
-4. **Coupon** — SAVE50 → abar 50 taka off
-5. **Take payment** — 2000 cash → Change dekhao → receipt print → **Enter chapo** —
-   next customer (modal close + scan box e focus)
-6. **Undo dekhao** — arekta item scan kore Undo chapo — Memento
-7. Logout → **manager login** → **Dashboard** — aajker sales, VAT, low stock
-8. **Sales Explorer** — aajker bill gulo → ekta receipt View → reprint;
-   ekta Void (reason soho) → stock fire uthe, Activity Log e entry
-9. **Promotions** — notun "Eid Snacks 15%" banao → POS e oi category er item er dam
-   NAME dekhao → back eshe toggle off → dam abar age jemon
-10. **Day Close** — mixed tender din banao → Day Close → preview math → drawer count
+1. **Login** — cashier chip-এ click। "৪টা role, আসল password, PBKDF2 hash"
+2. **POS** — barcode scan (box-এ `8941234500011` + Enter) → Teer oil bill-এ।
+   আলুর tile click → weight prompt 1.25 → weighed billing দেখাও
+3. **Attach customer** — 01711111111 (Nusrat) → 5% member discount LIVE নামতে দেখাও
+4. **Coupon** — SAVE50 → আবার ৫০ টাকা off
+5. **Take payment** — ২০০০ cash → Change দেখাও → receipt print → **Enter চাপো** —
+   next customer (modal বন্ধ + scan box-এ focus)
+6. **Undo দেখাও** — আরেকটা item scan করে Undo চাপো — Memento
+7. Logout → **manager login** → **Dashboard** — আজকের sales, VAT, low stock
+8. **Sales Explorer** — আজকের bill গুলো → একটা receipt View → reprint;
+   একটা Void (reason সহ) → stock ফেরত ওঠে, Activity Log-এ entry
+9. **Promotions** — নতুন "Eid Snacks 15%" বানাও → POS-এ ওই category-র item-এর দাম
+   নামতে দেখাও → ফিরে এসে toggle off → দাম আবার আগের মতো
+10. **Day Close** — mixed tender দিন বানাও → Day Close → preview-র হিসাব → drawer count
     → variance → Z-slip print
-11. **Purchases** — seeded PO ta khulo → Receive (GRN) — batch+expiry soho stock e uthche
-    → Template tab e "Clone into draft" — Prototype
-12. Logout → **developer login** → **Developer Mode** — Builder card khulo (real snippet
-    + test name) → API Explorer e `GET /api/products` try (200) → `POST /api/products`
-    try (**403 — gate ta LIVE dekhao**) → Diagnostics. Session sesh 🔥
+11. **Purchases** — seeded PO-টা খোলো → Receive (GRN) — batch+expiry সহ stock-এ উঠছে
+    → Template tab-এ "Clone into draft" — Prototype
+12. Logout → **developer login** → **Developer Mode** — Builder card খোলো (আসল snippet
+    + test-এর নাম) → API Explorer-এ `GET /api/products` try (200) → `POST /api/products`
+    try (**403 — gate-টা LIVE দেখাও**) → Diagnostics। Session শেষ 🔥
 
-## 23. Expected questions + jawab (FAQ)
+## 23. সম্ভাব্য প্রশ্ন + জবাব (FAQ)
 
-**Q: Payment gateway gulo ki real?**
-A: Card/bKash/Nagad er SDK shape real (poisha conversion, response format) kintu actual
-network call fake — course project e real merchant account lage. **Adapter layer ta
-100% real** — real SDK lagiye ditle connector badle bill code ek line change hobe na.
-README te clearly bolche.
+**প্র: Payment gateway গুলো কি আসল?**
+উ: Card/bKash/Nagad-এর SDK shape আসল (পয়সা conversion, response format) কিন্তু আসল
+network call fake — course project-এ আসল merchant account লাগে। **Adapter layer-টা
+১০০% আসল** — আসল SDK লাগিয়ে দিলে connector বদলে bill-এর code এক লাইনও change হবে না।
+README-তে clearly বলা আছে।
 
-**Q: Data ki harabe?**
-A: Na. MongoDB Atlas e sob persist. Test kora achi: sale kore → app restart → receipt
-byte-identical, stock/points/PO state sob thake.
+**প্র: Data কি হারাবে?**
+উ: না। MongoDB Atlas-এ সব persist। Test করা আছে: sale করে → app restart → receipt
+byte-identical, stock/points/PO state সব থাকে।
 
-**Q: 2 jon cashier ek sathe bill korle ki hobe?**
-A: Prottek login token er nijer bill session (purano project e 1 global cart chilo —
-sobaiyer basket meshye jeto!). Stock movement `synchronized` InventoryService er bitor
-hoy — race hoy na.
+**প্র: ২ জন cashier একসাথে bill করলে কী হবে?**
+উ: প্রতিটা login token-এর নিজের bill session (আগের প্রজেক্টে ১টা global cart ছিল —
+সবার বাস্কেট মিশে যেত!)। Stock movement `synchronized` InventoryService-এর ভেতরে
+হয় — race হয় না।
 
-**Q: VAT thik ache?**
-A: Inclusive pricing, back-calc `net×rate/(100+rate)`, per-line round kore sum —
-`VatVisitorTest` e exact number pin kora (115@15%→15.00). VatSummary report e slab
-onujayi total — NBR er musol at dhrar ready.
+**প্র: VAT ঠিক আছে?**
+উ: Inclusive pricing, back-calc `net×rate/(100+rate)`, per-line round করে sum —
+`VatVisitorTest`-এ exact সংখ্যা pin করা (115@15%→15.00)। VatSummary report-এ slab
+অনুযায়ী total — NBR-এর মাসলাত দেওয়ার ready।
 
-**Q: Pattern gulo ki real na dummy?**
-A: 167 test era prove kore — pipeline rollback test (declined card), state matrix test,
-proxy 403 test, hook-order test. Ar 3 pattern joono age dummy chilo (Prototype dead
-code, TaxVisitor test-only, Customer observer test-only) — project e EKhON business
-feature bojha: weekly template, NBR VAT report, real customer points.
+**প্র: Pattern গুলো কি আসল না dummy?**
+উ: ১৬৭টা test প্রমাণ করে — pipeline rollback test (declined card), state matrix test,
+proxy 403 test, hook-order test। আর ৩টা pattern-এর জন্য আগে dummy ছিল (Prototype dead
+code, TaxVisitor test-only, Customer observer test-only) — প্রজেক্টে এখন business
+feature বহন করে: weekly template, NBR VAT report, আসল customer points।
 
-**Q: Developer account ta ki? Ke eta dekhbe?**
-A: `developer/developer123` — shudhu ei login Developer Mode dekhe (pattern deep-dive +
-API explorer + diagnostics). Manager/admin/cashier er navbar e oita nai, URL e gelao
-redirect. Developer till-side screen chalate pare (live demo er jonno) kintu manager
-power nai. Business ladder er side e bosh ase — "upor" na.
+**প্র: Developer account-টা কী? কে এটা দেখবে?**
+উ: `developer/developer123` — শুধু এই login-ই Developer Mode দেখে (pattern deep-dive +
+API explorer + diagnostics)। Manager/admin/cashier-এর navbar-এ এটা নেই, URL-এ গেলেও
+redirect। Developer till-side screen চালাতে পারে (live demo-র জন্য) কিন্তু manager
+power নেই। Business ladder-এর পাশে বসে আছে — "উপরে" না।
 
-**Q: Z-report e cash math kivabe?**
-A: `expected = cashIn − changeOut − cashRefunds − voidCashOut`. CashIn window er SHOB
-sale er cash tender (void howay gele o — taka to drawer e dhukechilo), change sob
-drawer theke jay, cash refund jay, ar oi void jara EI window e refund hoise (kale kal er
-sale aaj void korle aajker drawer khoti hoy — `voidedAt` er jonno). 6 ta hand-checked
-test e pin kora.
+**প্র: Z-report-এ cash-এর হিসাব কীভাবে?**
+উ: `expected = cashIn − changeOut − cashRefunds − voidCashOut`। CashIn window-এর সব
+sale-এর cash tender (void হয়ে গেলেও — টাকা তো drawer-এ ঢুকেছিল), change সব
+drawer থেকে যায়, cash refund যায়, আর যেসব void-এর refund এই window-এ পড়েছে (কালকের
+sale আজ void করলে আজকের drawer ক্ষতি হয় — `voidedAt`-এর জন্যই সম্ভব)। ৬টা hand-checked
+test-এ pin করা।
 
-**Q: Notun kono pattern add korco?**
-A: NA — 18 e 18 i thakbe. Audit trail (Observer hote parto) ar Z-report (Template
-Method hote parto) dono te e reject korchi, ar reason javadoc e lekha ase. Feature
-age, pattern porer — ei project er main policy.
+**প্র: নতুন কোনো pattern add করেছ?**
+উ: না — ১৮-তেই ১৮ থাকবে। Audit trail (Observer হতে পারত) আর Z-report (Template
+Method হতে পারত) — দুটোতেই reject করেছি, আর কারণ javadoc-এ লেখা আছে। Feature
+আগে, pattern পরে — এটাই এই প্রজেক্টের main policy।
 
 ---
 
-## 24. Puro ACCESS MAP — ke ki pabe, kano alada, kon button er ki kaj
+## 24. পূর্ণ ACCESS MAP — কে কী পাবে, কেন আলাদা, কোন বাটনের কী কাজ
 
-Ei section ta **exam/viva er ready reference** — prottek role, prottek option, ki kaj,
-kivabe kaj kore, ar keno alada.
+এই সেকশনটা **exam/viva-র ready reference** — প্রতিটা role, প্রতিটা option, কী কাজ,
+কীভাবে কাজ করে, আর কেন আলাদা।
 
-### 24.1 Ek line e philosophy
+### 24.1 এক লাইনে philosophy
 
-Supershop e **trust er 3 level** + **1 technical role**: cashier protidin poisa chuye,
-manager shop chalay, malik (admin) business er marattik decision ney, developer (sudhu
-demo/viva-r jonno) pattern dekhe. Role alada na korle: cashier dam komiye dite parto,
-rokom poriskar poriskar kore stock muchhe felte parto, keu jekono receipt void kore
-poisa habis korte parto. Tai: **jei kaj dokandari/khoti korhte pare, seta manager+;
-jei kaj puro business ke affect kore, seta sudhu malik.**
+সুপারশপে **trust-এর ৩টা স্তর** + **১টা technical role**: cashier প্রতিদিন টাকা ছোঁয়,
+manager দোকান চালায়, মালিক (admin) business-এর মারাত্মক decision নেয়, developer (শুধু
+demo/viva-র জন্য) pattern দেখে। Role আলাদা না করলে: cashier দাম কমিয়ে দিতে পারত,
+রমকম পরিষ্কার করে stock মুছে ফেলতে পারত, কেউ যেকোনো receipt void করে
+টাকা লোপাতে পারত। তাই: **যে কাজে দোকানদারি/ক্ষতি করতে পারে, সেটা manager+;
+যে কাজ পুরো business-কে affect করে, সেটা শুধু মালিকের।**
 
-### 24.2 Master table — screen onujayi ke ki dekhe
+### 24.2 Master table — screen অনুযায়ী কে কী দেখে
 
-| Screen (navbar) | Cashier | Developer | Manager | Admin | Kano ei role-e |
+| Screen (navbar) | Cashier | Developer | Manager | Admin | কেন এই role-এ |
 |---|---|---|---|---|---|
-| POS (bikri) | ✔ | ✔ | ✔ | ✔ | Bikri shobai kore — ekhane lock korle shop cholbe na |
-| Inventory (stock) | ✔ | ✔ | ✔ | ✔ | Stock dekha shobar dorkar; **button gulo alada** (nice dekho) |
-| Loyalty (customers) | ✔ | ✔ | ✔ | ✔ | Member attach kajer; **points adjust manager+** |
-| Returns | ✔ | ✔ | ✔ | ✔ | Return till e hoy; **history manager+** |
-| Reports | ✔ (4 ta) | ✔ (4 ta) | ✔ (8 ta) | ✔ (8 ta) | Operational report shobaiar; **finance report manager+** |
-| Alerts | ✔ | ✔ | ✔ | ✔ | Low stock/expiry sobaike dekhte hobe |
-| Dashboard | — | — | ✔ | ✔ | Aajker hisheb = shop chalanor kaj, cashier er na |
-| Purchases | — | — | ✔ | ✔ | Maal kena = poisa geche, manager er decision |
-| Sales Explorer | — | — | ✔ | ✔ | Sob receipt dekha + VOID = power, cashier ke lagbe na |
-| Promotions | — | — | ✔ | ✔ | Dam komano/barano = marketing + margin er byapar |
-| Activity Log | — | — | ✔ | ✔ | "Ke ki korlo" = accountability, keu nijer upor judge hobe na |
-| Day Close (Z) | — | — | ✔ | ✔ | Drawer reconciliation + poisa safe e tola = manager sesh kaj |
-| Staff | — | — | — | ✔ | Ke jabo shop e, ke pay pabe — shudhu malik er boro |
-| Developer Mode | — | ✔ | — | — | Pattern/API/diagnostics — examiner ba dev er jinish, business na |
+| POS (বিক্রি) | ✔ | ✔ | ✔ | ✔ | বিক্রি সবাই করে — এখানে lock করলে দোকান চলবে না |
+| Inventory (stock) | ✔ | ✔ | ✔ | ✔ | Stock দেখা সবার দরকার; **বাটনগুলো আলাদা** (নিচে দেখো) |
+| Loyalty (customers) | ✔ | ✔ | ✔ | ✔ | Member attach কাজের; **points adjust manager+** |
+| Returns | ✔ | ✔ | ✔ | ✔ | Return till-এ হয়; **history manager+** |
+| Reports | ✔ (৪টা) | ✔ (৪টা) | ✔ (৮টা) | ✔ (৮টা) | Operational report সবার; **finance report manager+** |
+| Alerts | ✔ | ✔ | ✔ | ✔ | Low stock/expiry সবাইকে দেখতে হবে |
+| Dashboard | — | — | ✔ | ✔ | আজকের হিসেব = দোকান চালানোর কাজ, cashier-এর না |
+| Purchases | — | — | ✔ | ✔ | মাল কেনা = টাকা গেছে, manager-এর decision |
+| Sales Explorer | — | — | ✔ | ✔ | সব receipt দেখা + VOID = power, cashier-এর দরকার নেই |
+| Promotions | — | — | ✔ | ✔ | দাম কমানো/বাড়ানো = marketing + margin-এর ব্যাপার |
+| Activity Log | — | — | ✔ | ✔ | "কে কী করলো" = accountability, কেউ নিজের উপর judge হবে না |
+| Day Close (Z) | — | — | ✔ | ✔ | Drawer reconciliation + টাকা safe-এ তোলা = manager-এর শেষ কাজ |
+| Staff | — | — | — | ✔ | কে দোকানে ঢুকবে, কে pay পাবে — শুধু মালিকের ব্যাপার |
+| Developer Mode | — | ✔ | — | — | Pattern/API/diagnostics — examiner বা dev-এর জিনিস, business না |
 
-> **Ekta screen e "✔" mane shob button na** — niche `24.5` e dekho, same screen e
-> button-level alada gate ase (Inventory sobai dekhe kintu Delete shudhu admin).
+> **একটা screen-এ "✔" মানে সব বাটন না** — নিচের `24.5`-এ দেখো, একই screen-এ
+> button-level আলাদা gate আছে (Inventory সবাই দেখে কিন্তু Delete শুধু admin)।
 
-### 24.3 CASHIER er puro option list (ki kaj + kivabe kaj kore)
+### 24.3 CASHIER-এর পূর্ণ option list (কী কাজ + কীভাবে কাজ করে)
 
-| Option | Ki kaj | Bhitore kivabe chole |
+| Option | কী কাজ | ভেতরে কীভাবে চলে |
 |---|---|---|
-| **POS — Scan box** | Barcode/type kore item add | ≥6 digit = barcode lookup API, onno word = name search → `POST /api/bill/lines` → bill session e line |
-| **POS — Category chips + tiles** | Hate item select | Shob product `GET /api/products?view=in_stock` theke ashe (Iterator pattern) |
-| **+/– /✏️/🗑️ (line e)** | Qty barano/komano (unit e 1 step, weighed e 0.25 kg), pencil = weight change, delete = line muchhe | `PUT /api/bill/lines/{index}` — memento te purano state save thake |
-| **Undo (n)** | Last kaj undo — mis-scan er ilaz | `POST /api/bill/undo` — Memento stack theke ager snapshot fire |
-| **Clear (✕)** | Puro bill fele dewa | `DELETE /api/bill` |
-| **Attach** | Loyalty member lagano → 5% member price auto | `PUT /api/bill/customer` → PromotionEngine MemberPrice strategy chalu hoy |
-| **Coupon** | Coupon code (SAVE50, WELCOME10) | `PUT /api/bill/coupon` → validate hose, tender er somoy chain check kore |
-| **Bags/Delivery** | 5 taka bag + delivery charge | `PUT /api/bill/charges` → Decorator hisebe bill e jore |
-| **Take payment** | Split tender (CASH/CARD/BKASH/NAGAD/POINTS) | `POST /api/bill/tender` → validation chain → 4 Command (Reserve→Charge→Points→CreateSale) — ekta failhle SOB rollback |
-| **Receipt (print/copy/save)** | Thermal print, text copy, TXT download | Iframe printer (320px slip); Reprint o same jinish |
-| **Enter ↵** | Next customer — modal close + scan focus | shown.bs.modal er por armed, hidden e disarm |
-| **Inventory dekha** | Stock/batch/expiry dekhe | `GET /api/products?view=...` — server-side Iterator view |
-| **Loyalty Register** | Notun member add | `POST /api/customers` |
-| **Returns process** | Receipt lookup → line wise qty+reason → refund | `POST /api/sales/{receiptNo}/returns` → pro-rata refund, stock fire uthe |
-| **Reports (4 ta)** | Daily sales, best sellers, low stock, expiry | `GET /api/reports/{key}` — Template Method + CSV download |
-| **Alerts** | Feed dekha, mark read | `GET /api/alerts`, `POST /api/alerts/{id}/read` |
+| **POS — Scan box** | Barcode/নাম লিখে item add | ≥৬ digit = barcode lookup API, অন্য শব্দ = name search → `POST /api/bill/lines` → bill session-এ line |
+| **POS — Category chips + tiles** | হাতে item select | সব product `GET /api/products?view=in_stock` থেকে আসে (Iterator pattern) |
+| **+/– /✏️/🗑️ (line-এ)** | Qty বাড়ানো/কমানো (unit-এ ১ ধাপ, weighed-এ 0.25 kg), pencil = ওজন change, delete = line মুছে ফেলা | `PUT /api/bill/lines/{index}` — memento-তে আগের state save থাকে |
+| **Undo (n)** | শেষ কাজ undo — mis-scan-এর ইলাজ | `POST /api/bill/undo` — Memento stack থেকে আগের snapshot-এ ফেরা |
+| **Clear (✕)** | পুরো bill ফেলে দেওয়া | `DELETE /api/bill` |
+| **Attach** | Loyalty member লাগানো → 5% member price auto | `PUT /api/bill/customer` → PromotionEngine-এর MemberPrice strategy চালু হয় |
+| **Coupon** | Coupon code (SAVE50, WELCOME10) | `PUT /api/bill/coupon` → validate হয়, tender-এর সময় chain check করে |
+| **Bags/Delivery** | ৫ টাকার bag + delivery charge | `PUT /api/bill/charges` → Decorator হিসেবে bill-এ জোড়া হয় |
+| **Take payment** | Split tender (CASH/CARD/BKASH/NAGAD/POINTS) | `POST /api/bill/tender` → validation chain → ৪টা Command (Reserve→Charge→Points→CreateSale) — একটা fail হলে সব rollback |
+| **Receipt (print/copy/save)** | Thermal print, text copy, TXT download | Iframe printer (320px slip); Reprint-ও একই জিনিস |
+| **Enter ↵** | Next customer — modal বন্ধ + scan-এ focus | shown.bs.modal-এর পর armed, hidden-এ disarm |
+| **Inventory দেখা** | Stock/batch/expiry দেখা | `GET /api/products?view=...` — server-side Iterator view |
+| **Loyalty Register** | নতুন member add | `POST /api/customers` |
+| **Returns process** | Receipt lookup → line ধরে qty+reason → refund | `POST /api/sales/{receiptNo}/returns` → pro-rata refund, stock ফেরত ওঠে |
+| **Reports (৪টা)** | Daily sales, best sellers, low stock, expiry | `GET /api/reports/{key}` — Template Method + CSV download |
+| **Alerts** | Feed দেখা, mark read | `GET /api/alerts`, `POST /api/alerts/{id}/read` |
 
-**Cashier ER KORTE PARBE NA:** product create/edit/delete, restock, shrinkage, points
+**Cashier করতে পারবে না:** product create/edit/delete, restock, shrinkage, points
 adjust, promotion change, PO/supplier, void, sales history, day close, staff, finance
-report — button nijei dekhabe na, URL/api diye dileo **server 403** dey.
+report — বাটন নিজেই দেখাবে না, URL/api দিয়ে দিলেও **server 403** দেয়।
 
-### 24.4 MANAGER er beshi ja pabe (cashier er upor)
+### 24.4 MANAGER যা বেশি পাবে (cashier-এর উপরে)
 
-| Option | Ki kaj | Bhitore kivabe chole |
+| Option | কী কাজ | ভেতরে কীভাবে চলে |
 |---|---|---|
-| **Dashboard** | Aajker 6 KPI (net, basket, VAT, cash, low stock, expiry) | `GET /api/reports/dashboard` — same Iterator/repo theke |
-| **Inventory — Add item** | Notun item (Factory) ba COMBO (Composite, component picker) | `POST /api/products` → ProductFactory/ComboProduct → RoleGate MANAGER |
-| **Inventory — Restock** | Stock barano batch+expiry soho | `POST /api/products/{id}/restock` → RESTOCK event → alert |
-| **Inventory — Adjust (shrinkage)** | DAMAGE/LOSS/THEFT/COUNT lekha | `POST /api/products/{id}/adjust` → SHRINKAGE event + audit |
-| **Inventory — Edit** | Naam/cost/price/reorder change | `PUT /api/products/{id}` → PRICE_CHANGE event + audit (price old→new) |
-| **Purchases (PO board)** | Draft→Submit→GRN receive→Pay→Close, cancel reason soho | State pattern — bhul transition server e block |
-| **GRN receive** | Maal elle batch+expiry+cost bosano | Stock uthhe + ExpiryWatcher check + audit PO_RECEIVED |
+| **Dashboard** | আজকের ৬টা KPI (net, basket, VAT, cash, low stock, expiry) | `GET /api/reports/dashboard` — একই Iterator/repo থেকে |
+| **Inventory — Add item** | নতুন item (Factory) বা COMBO (Composite, component picker) | `POST /api/products` → ProductFactory/ComboProduct → RoleGate MANAGER |
+| **Inventory — Restock** | Stock বাড়ানো batch+expiry সহ | `POST /api/products/{id}/restock` → RESTOCK event → alert |
+| **Inventory — Adjust (shrinkage)** | DAMAGE/LOSS/THEFT/COUNT লেখা | `POST /api/products/{id}/adjust` → SHRINKAGE event + audit |
+| **Inventory — Edit** | নাম/cost/price/reorder change | `PUT /api/products/{id}` → PRICE_CHANGE event + audit (দাম old→new) |
+| **Purchases (PO board)** | Draft→Submit→GRN receive→Pay→Close, cancel reason সহ | State pattern — ভুল transition server-ই ব্লক করে |
+| **GRN receive** | মাল এলে batch+expiry+cost বসানো | Stock ওঠে + ExpiryWatcher check + audit PO_RECEIVED |
 | **Suppliers tab** | Distributor add (terms, contact) | `POST /api/suppliers` |
 | **Standing templates** | Save as template + Clone into draft | Prototype pattern — `POST /purchase-orders/templates` + `from-template` |
 | **Sales Explorer** | Date/status/cashier filter, receipt view/reprint | `GET /api/sales?...` (manager gate) |
-| **Void** | Receipt bure kora — reason LAGBE | `POST /api/sales/{receiptNo}/void` → Command pipeline ulta kore chole: stock/tender/points sob reverse + audit |
-| **Promotions** | Category sale/member price/coupon CRUD + toggle + tester | `POST/PUT/DELETE /api/promotions` — Strategy live, POS sathe dam change |
-| **Points adjust** | Member er points thik kora | `POST /api/customers/{id}/points/adjust` + audit |
-| **Activity Log** | Ke ki korlo sob | `GET /api/audit` — 500 cap, newest first, filter soho |
-| **Day Close (Z)** | Drawer count → variance → Z-slip print → history | `GET preview` → `POST close` (server abar nijer theke hisheb kore) |
-| **Returns history** | Sob return er list | `GET /api/returns` |
-| **Finance reports (4)** | Returns, staff perf, profit, VAT | `GET /api/reports/{key}` — role map e MANAGER |
+| **Void** | Receipt বাতিল — reason **লাগবেই** | `POST /api/sales/{receiptNo}/void` → Command pipeline উল্টো করে চলে: stock/tender/points সব reverse + audit |
+| **Promotions** | Category sale/member price/coupon CRUD + toggle + tester | `POST/PUT/DELETE /api/promotions` — Strategy live, POS-এ সাথে সাথে দাম change |
+| **Points adjust** | Member-এর points ঠিক করা | `POST /api/customers/{id}/points/adjust` + audit |
+| **Activity Log** | কে কী করলো সব | `GET /api/audit` — 500 cap, newest first, filter সহ |
+| **Day Close (Z)** | Drawer count → variance → Z-slip print → history | `GET preview` → `POST close` (server আবার নিজেই হিসাব করে) |
+| **Returns history** | সব return-এর list | `GET /api/returns` |
+| **Finance reports (৪টা)** | Returns, staff perf, profit, VAT | `GET /api/reports/{key}` — role map-এ MANAGER |
 
-**Manager ER KORTE PARBE NA:** item **delete** (admin only), staff account manage,
-Developer Mode.
+**Manager করতে পারবে না:** item **delete** (শুধু admin), staff account manage,
+Developer Mode।
 
-### 24.5 ADMIN (malik) er beshi ja pabe (manager er upor)
+### 24.5 ADMIN (মালিক) যা বেশি পাবে (manager-এর উপরে)
 
-| Option | Ki kaj | Bhitore kivabe chole |
+| Option | কী কাজ | ভেতরে কীভাবে চলে |
 |---|---|---|
-| **Inventory — Delete 🗑️** | Catalog theke item bure kora | `DELETE /api/products/{id}` — RoleGate ADMIN + **RoleGuardProxy abar check kore** (double lock) |
-| **Staff — Add staff** | Notun account (CASHIER/MANAGER/ADMIN/DEVELOPER) | `POST /api/users` → PBKDF2 hash → audit USER_CREATED |
-| **Staff — Disable/Enable** | Account block/unblock | `PUT /api/users/{id}` — disabled mane login e reject |
-| **Staff — Reset password** | Bhul password er ilaz | Same PUT — audit te "password reset" lekha thake |
+| **Inventory — Delete 🗑️** | Catalog থেকে item বাতিল | `DELETE /api/products/{id}` — RoleGate ADMIN + **RoleGuardProxy আবার check করে** (double lock) |
+| **Staff — Add staff** | নতুন account (CASHIER/MANAGER/ADMIN/DEVELOPER) | `POST /api/users` → PBKDF2 hash → audit USER_CREATED |
+| **Staff — Disable/Enable** | Account ব্লক/আনব্লক | `PUT /api/users/{id}` — disabled মানে login-এ reject |
+| **Staff — Reset password** | ভুল password-এর ইলাজ | একই PUT — audit-এ "password reset" লেখা থাকে |
 
-Malik o day close/promotions/void shob manager-er jinish korte pare (ADMIN ≥ MANAGER
-ladder e upore). **Malik Developer Mode dekhe na** — developer login lagbe.
+মালিকও day close/promotions/void — সব manager-এর কাজ করতে পারে (ADMIN ≥ MANAGER
+ladder-এ উপরে)। **মালিক Developer Mode দেখে না** — developer login লাগবে।
 
-### 24.6 Same screen, alada button — nice gulo
+### 24.6 একই screen, আলাদা বাটন — এই জায়গাগুলো
 
-| Screen | Cashier dekhe | Manager dekhe | Admin dekhe |
+| Screen | Cashier দেখে | Manager দেখে | Admin দেখে |
 |---|---|---|---|
-| Inventory | Shudhu table | + Add/Restock/Adjust/Edit | + Delete |
+| Inventory | শুধু table | + Add/Restock/Adjust/Edit | + Delete |
 | Loyalty | + Register | + Adjust points | + Adjust points |
 | Returns | Process form | + History section | + History section |
-| Reports | 4 ta button | 8 ta button | 8 ta button |
+| Reports | ৪টা বাটন | ৮টা বাটন | ৮টা বাটন |
 
-Eta **UI te hide kora na** — server e prottek button er nijer gate (`RoleGate`),
-frontend e o route-level hard gate: cashier URL e `#/dashboard` likhle toast dey
-"Your role cannot open that page" ar POS e fire jay.
+এটা **UI-তে hide করা না** — server-এ প্রতিটা বাটনের নিজের gate (`RoleGate`),
+frontend-এও route-level hard gate: cashier URL-এ `#/dashboard` লিখলে toast দেয়
+"Your role cannot open that page" আর POS-এ ফেরত পাঠায়।
 
-### 24.7 Ei security ta kivabe kaj kore (ek button click er jibon)
+### 24.7 এই security কীভাবে কাজ করে (একটা বাটন ক্লিকের জীবন)
 
 ```
 1. Login: username/password → PBKDF2 verify → 256-bit token (12h sliding)
-2. Prottek request: "Authorization: Bearer <token>" header e jay
-3. AuthFilter: token check → TokenStore theke Caller (ka? kon role?)
-   → ThreadLocal RoleContext e rakha (finally e clear — thread race nai)
+2. প্রতিটা request: "Authorization: Bearer <token>" header-এ যায়
+3. AuthFilter: token check → TokenStore থেকে Caller (কে? কোন role?)
+   → ThreadLocal RoleContext-এ রাখা (finally-তে clear — thread race নেই)
 4. Controller: RoleGate.requireAtLeast(MANAGER) / requireRole(DEVELOPER)
-   → na pele 403 AccessDeniedException (JSON e clear message)
-5. Product write er khetre: RoleGuardProxy (repo er samne) ABAR check kore
-   — controller e bug thakleo data layer e block
-6. Kaaj hole: audit log e actor + action + detail jore dey
+   → না পেলে 403 AccessDeniedException (JSON-এ clear message)
+5. Product write-এর ক্ষেত্রে: RoleGuardProxy (repo-র সামনে) আবার check করে
+   — controller-এ bug থাকলেও data layer-এ ব্লক
+6. কাজ হলে: audit log-এ actor + action + detail জোড়া দেয়
 ```
 
-**3 layer security:** (1) UI te menu hide — sudhu Sundor dekhanor jonno, (2) server
-RoleGate — asol enforcement, (3) RoleGuardProxy — product data'r last line of defense.
-**Client kokhono role bale na** — role ashe server-side token theke, tai DevTools
-thereke change korleo kaj hobe na.
+**৩ স্তরের security:** (১) UI-তে menu hide — শুধু সুন্দর দেখানোর জন্য, (২) server-এর
+RoleGate — আসল enforcement, (৩) RoleGuardProxy — product data-র last line of defense।
+**Client কখনো role বলে না** — role আসে server-side token থেকে, তাই DevTools
+থেকে change করলেও কাজ হবে না।
 
-### 24.8 Kano ei separation (viva-r 1-minute answer)
+### 24.8 কেন এই separation (viva-র ১-মিনিটের জবাব)
 
-- **Poisa'r khoti jekhane** (void, shrinkage, price change, promotion, day close) →
-  manager — karon duty shift sesh e manager drawer jomawala accountable
-- **Business er borо decision** (staff, item delete) → malik — ei duita pichhe fire
-  na, tai highest trust er manush
-- **Bikri'r gati slow rakhte** (POS, returns, stock dekha) → shobai — cashier ke
-  manager der wait korhte hobe na
-- **Accountability** (Activity Log) → manager+ dekhe — karon "ke ki korlo" er answer
-  malik/manager lagbe, nijer nijer upor judge shobai pashe
-- **Examiner der jonno alada duro** (Developer Mode) → developer login — business
-  staff er matha etukui bhanga lagbe na, ar developer ba business power mixed hobe na
+- **টাকার ক্ষতি যেখানে** (void, shrinkage, price change, promotion, day close) →
+  manager — কারণ duty shift শেষে manager drawer জমানোর জন্য accountable
+- **Business-এর বড় decision** (staff, item delete) → মালিক — এই দুটো পিছায়ে ফেরা যায় না,
+  তাই highest trust-এর মানুষ
+- **বিক্রির গতি বজায় রাখতে** (POS, returns, stock দেখা) → সবাই — cashier-কে
+  manager-দের wait করতে হবে না
+- **Accountability** (Activity Log) → manager+ দেখে — কারণ "কে কী করলো"-র উত্তর
+  মালিক/manager-কেই লাগবে
+- **Examiner-দের জন্য আলাদা ঘর** (Developer Mode) → developer login — business
+  staff-এর মাথা এটুকুই ভাঙা লাগবে না, আর developer আর business power মিশে যাবে না
 
 ---
 
-*Ei document ta `README.md` er Bangla companion — README te English e formal details
-(setup, API table, architecture diagram) ache, ekhane business-level bujhaano.*
+*এই ডকুমেন্টটা `README.md`-এর বাংলা companion — README-তে English-এ formal details
+(setup, API table, architecture diagram) আছে, এখানে business-level বোঝানো।*
+
+
+
+
