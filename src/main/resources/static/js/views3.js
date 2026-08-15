@@ -110,8 +110,12 @@ Object.assign(Views, (() => {
 
     // ============================== SALES EXPLORER ==============================
 
+    // Business "today" is the Dhaka day — toISOString() would drift a day behind
+    // between midnight and 6am (UTC), hiding tonight's entries from the default filter.
+    const dhakaToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+
     async function sales(host) {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = dhakaToday();
         host.innerHTML = `
         <div class="d-flex flex-wrap gap-2 align-items-center mt-2 mb-3">
           <h4 class="mf-page-title mb-0 me-auto"><i class="bi bi-journal-text"></i> Sales explorer</h4>
@@ -360,7 +364,7 @@ Object.assign(Views, (() => {
     // ============================== ACTIVITY LOG ==============================
 
     async function activity(host) {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = dhakaToday();
         const ACTIONS = ["LOGIN", "LOGIN_FAILED", "LOGOUT", "SALE_VOIDED", "RETURN_PROCESSED",
             "PRODUCT_CREATED", "PRODUCT_UPDATED", "PRODUCT_DELETED", "STOCK_RESTOCKED",
             "SHRINKAGE_RECORDED", "POINTS_ADJUSTED", "PROMOTION_CREATED", "PROMOTION_UPDATED",
@@ -428,7 +432,7 @@ Object.assign(Views, (() => {
     // ============================== DAY CLOSE (Z-REPORT) ==============================
 
     async function dayClose(host) {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = dhakaToday();
         host.innerHTML = `
         <div class="d-flex flex-wrap gap-2 align-items-center mt-2 mb-3">
           <h4 class="mf-page-title mb-0 me-auto"><i class="bi bi-journal-check"></i> Day close — Z-report</h4>
