@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="figs/fig5_5_dashboard.png" alt="MartFlow Dashboard" width="100%" style="border-radius:12px"/>
-
 <h1>🛒 MartFlow</h1>
 <h3>Supershop Retail Management Suite for Bangladesh</h3>
 
@@ -19,6 +17,8 @@
   A complete retail management system for Bangladeshi supershops,<br/>
   built in plain Java with <strong>18 real GoF design patterns</strong> doing real work in the money path.
 </p>
+
+<img src="figs/fig5_5_dashboard.png" alt="MartFlow Dashboard" width="100%" style="border-radius:12px"/>
 
 </div>
 
