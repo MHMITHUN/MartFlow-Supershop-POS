@@ -20,24 +20,6 @@ target/
 Thumbs.db
 
 
-.agent/
-.agents/
-.claude/
-.kilo/
-.cursor/
-.gemini/
-.cline/
-.roo/
-openspec/
-.openspec/
-
-
-docs/
-Project-Requirement/
-EXPLANATION.md
-explanationBangla.md
-CONTRIBUTORS.md
-projectexplain.md
 
 # Dependencies
 node_modules/

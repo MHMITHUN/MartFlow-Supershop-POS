@@ -1,0 +1,1523 @@
+%==============================================================================
+%  MartFlow --- Supershop Retail Management Suite
+%  CSE 464 : Software Design Pattern Lab  |  Summer 2026
+%  Final Project Report
+%
+%  Compile on Overleaf with pdflatex; run 2-3 passes for TOC / LOF / LOT.
+%
+%  DIAGRAM WORKFLOW (Mermaid):
+%   - Every figure below that uses \dfig has its Mermaid source in a comment
+%     block directly above it, opened by a "MERMAID: <slug>" banner.
+%   - Render at https://mermaid.live (strip the leading "% "), export PNG 3x,
+%     save as diagrams/<slug>.png, upload into a "diagrams" folder in
+%     Overleaf. The placeholder box is replaced by the real image
+%     automatically -- no .tex edits needed.
+%   - UI screenshots go into a "figs" folder (see the \uifig slots in
+%     Chapter 5); missing files render a placeholder and never break the
+%     build.
+%==============================================================================
+\documentclass[12pt,a4paper]{report}
+
+%---------- Geometry & page setup ----------
+\usepackage[a4paper,top=1.0in,bottom=1.0in,left=1.1in,right=1.1in,headheight=15pt]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{10pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-60pt}{20pt}
+
+%---------- Encoding / fonts (pdflatex-safe, 7-bit ASCII diagrams) ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
+%---------- Math, tables, graphics ----------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+
+%---------- Colour, lists, code, links ----------
+\usepackage{xcolor}
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=*,topsep=2pt,itemsep=1pt}
+\setlist[enumerate]{leftmargin=*,topsep=2pt,itemsep=1pt}
+\usepackage{listings}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+%---------- TikZ for diagrams ----------
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,shapes.misc,calc,fit,backgrounds}
+
+%---------- Brand palette (emerald + gold, matching the app) ----------
+\definecolor{emerald}{HTML}{047857}
+\definecolor{emeraldlight}{HTML}{10B981}
+\definecolor{gold}{HTML}{C99A2E}
+\definecolor{slate}{HTML}{475569}
+\definecolor{codebg}{HTML}{F6F8F7}
+
+%---------- Listings styles (code + ASCII diagrams) ----------
+\lstdefinelanguage{JavaScript}{
+  morekeywords={const,let,var,function,return,if,else,for,await,async,new,try,catch,require,module,exports,true,false,null,typeof},
+  morecomment=[l]{//},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinelanguage{Java}{
+  morekeywords={abstract,assert,boolean,break,byte,case,catch,char,class,continue,default,do,double,else,enum,extends,final,finally,float,for,if,implements,import,instanceof,int,interface,long,native,new,package,private,protected,public,return,short,static,super,switch,synchronized,this,throw,throws,transient,try,void,volatile,while,true,false,null,var,record},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]'
+}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  breaklines=true,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{slate!40},
+  keywordstyle=\color{emerald}\bfseries,
+  commentstyle=\color{slate}\itshape,
+  stringstyle=\color{gold!80!black},
+  showstringspaces=false,
+  numbersep=6pt,
+  xleftmargin=10pt
+}
+
+\lstdefinestyle{ascii}{
+  language=,
+  basicstyle=\ttfamily\scriptsize,
+  frame=single,
+  numbers=none,
+  keywordstyle=,
+  commentstyle=,
+  stringstyle=,
+  backgroundcolor=\color{codebg}
+}
+
+%---------- Headers / footers ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape MartFlow}
+\fancyhead[R]{\small Software Design Pattern Lab}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+%---------- Reference / appendix names ----------
+\renewcommand{\bibname}{References}
+\renewcommand{\contentsname}{Table of Contents}
+
+%---------- Helper: Mermaid diagram figure with graceful placeholder ----------
+% \dfig{Caption}{fig:label}{diagrams/slug.png}{width-fraction}
+% The Mermaid source sits in a comment block IMMEDIATELY above each call.
+\newcommand{\dfig}[4]{%
+  \begin{figure}[H]
+  \centering
+  \IfFileExists{#3}{%
+    \includegraphics[width=#4\textwidth,keepaspectratio]{#3}%
+  }{%
+    \setlength{\fboxsep}{10pt}\setlength{\fboxrule}{0.4pt}%
+    \fcolorbox{slate!40}{codebg}{%
+      \begin{minipage}[c][6.2cm][c]{0.88\textwidth}\centering
+        \itshape\small Render the Mermaid block above this figure at\\
+        \url{https://mermaid.live} and export a 3$\times$ PNG as\\[2pt]
+        \texttt{\detokenize{#3}}\\[2pt]
+        This box is then replaced by the real diagram automatically.
+      \end{minipage}}%
+  }%
+  \caption{#1}\label{#2}
+  \end{figure}}
+
+%---------- Helper: UI screenshot loader / placeholder ----------
+% \uifig{Caption}{fig:label}{figs/name.png}
+\newcommand{\uifig}[3]{%
+  \begin{figure}[H]
+  \centering
+  \IfFileExists{#3}{%
+    \includegraphics[width=0.88\textwidth]{#3}%
+  }{%
+    \setlength{\fboxsep}{10pt}
+    \setlength{\fboxrule}{0.4pt}%
+    \fcolorbox{slate!40}{codebg}{%
+      \begin{minipage}[c][5.2cm][c]{0.88\textwidth}
+        \centering
+        \itshape\small \detokenize{#3}
+      \end{minipage}
+    }%
+  }%
+  \caption{#1}\label{#2}
+  \end{figure}}
+
+\begin{document}
+
+%==============================================================================
+%  COVER PAGE
+%==============================================================================
+\begin{titlepage}
+\thispagestyle{empty}
+
+\vspace*{0.4cm}
+
+\noindent
+\begin{minipage}{0.15\textwidth}
+    \IfFileExists{bubtlogo.png}{%
+        \includegraphics[width=\linewidth]{bubtlogo.png}%
+    }{%
+        \framebox[\linewidth]{%
+            \rule{0pt}{0.8\linewidth}
+            \centering\small BUBT
+        }%
+    }
+\end{minipage}%
+\begin{minipage}{0.85\textwidth}
+    \centering
+    \large \textbf{Bangladesh University of Business and Technology}\\[1ex]
+    \large Department of Computer Science and Engineering
+\end{minipage}
+
+\vspace{1.5cm}
+
+\begin{center}
+    \Large CSE 464 : Software Design Pattern Lab
+\end{center}
+
+\vspace{1cm}
+
+\begin{center}
+    \Huge \textbf{PROJECT REPORT}
+\end{center}
+
+\vspace{1.5cm}
+
+\noindent
+\begin{tabular}{@{}l @{\hspace{0.4em}:\hspace{0.8em}} l@{}}
+    \textbf{Semester}        & Summer 2026 \\[1.2ex]
+    \textbf{Title}           & MartFlow --- Supershop Retail Management Suite \\[1.2ex]
+    \textbf{Submission Date} & 17 August 2026
+\end{tabular}
+
+\vspace{1.5cm}
+
+\begin{center}
+    \textbf{TEAM MEMBERS}\\[2ex]
+
+    \renewcommand{\arraystretch}{1.3}
+
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Full ID} & \textbf{Full Name} & \textbf{Intake/Section} \\
+        \hline
+        22235103137 & Md. Mahamudul Hasan & 51/11 \\
+        \hline
+        22235103251 & Sumya Soma & 51/11 \\
+        \hline
+        22235103680 & Alfa Sany & 51/11 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\vspace{2cm}
+
+\begin{center}
+    \textbf{SUPERVISED BY}\\[2ex]
+
+    \textbf{Talimul Bari Shreshtho}\\
+    Lecturer, Department of CSE\\
+    Bangladesh University of Business and Technology (BUBT)
+\end{center}
+
+\end{titlepage}
+
+%==============================================================================
+%  FRONT MATTER
+%==============================================================================
+\pagenumbering{roman}
+
+%---------- Abstract ----------
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\noindent
+MartFlow is a supershop retail management suite that gives a Bangladeshi supershop branch a
+single system for point-of-sale billing, inventory, purchasing, promotions, loyalty, returns
+and financial reporting. The presentation tier is a vanilla-JavaScript single-page
+application served by the back end: a hash router drives 15 role-gated screens styled with
+Bootstrap~5.3.3, including a thermal-receipt printer. The application tier is written in
+Java~17 on Spring Boot~3.4.0 and deliberately keeps the domain 100\%~framework-free: 15 REST
+controllers expose 62 endpoints, each delegating to plain-Java facades and services in which
+18 GoF design patterns (4~creational, 5~structural and 9~behavioral) each carry a real
+business feature. The data tier is MongoDB Atlas with 11~collections, behind a generic
+repository interface with a zero-configuration in-memory fallback for demos. Authentication
+uses PBKDF2 password hashing and 256-bit bearer tokens with a sliding 12-hour lifetime;
+authorization is enforced in three layers --- hidden menus, server-side role gates on every
+controller, and a role-guard proxy on the data boundary --- across four roles: owner,
+manager, cashier and developer. The platform delivers 16 functional modules, including
+VAT-inclusive billing with NBR slab back-calculation (0\%, 7.5\%, 15\%), split tenders over
+cash, card, bKash, Nagad and loyalty points, a guarded purchase-order state machine, partial
+returns with pro-rata refunds, a reconciled day-close Z-report, an append-only audit trail,
+and eight report types exportable to CSV. Every money figure is an exact-decimal
+\texttt{BigDecimal}, all business time is pinned to Asia/Dhaka, and 176 automated tests in
+31 hermetic test classes protect the money paths. A built-in Developer Mode documents each
+pattern with its real source snippet and proving test, making the suite a working product
+and a living design-patterns laboratory at the same time.
+
+\vspace{1em}
+\noindent\textbf{Keywords:} point of sale, supershop retail, Bangladesh, NBR VAT,
+inventory, purchasing, loyalty, GoF design patterns, Java, Spring Boot, MongoDB Atlas,
+PBKDF2, role-based access control, single-page application.
+
+%---------- Acknowledgment ----------
+\chapter*{Acknowledgment}
+\addcontentsline{toc}{chapter}{Acknowledgment}
+\noindent
+We express our sincere gratitude to our supervisor, \textbf{Talimul Bari Shreshtho},
+Lecturer, Department of Computer Science and Engineering, Bangladesh University of Business
+and Technology, for continuous guidance, valuable suggestions and encouragement throughout
+the development of this project. We are also thankful to the faculty members of the
+Department for their support, and to the open-source community --- the Java, Spring Boot,
+MongoDB, Bootstrap and JUnit projects in particular --- whose libraries and documentation
+made this work possible. Finally, we thank our families for their patience and
+encouragement during the entire CSE~464 cycle.
+
+%---------- Table of contents / list of figures / list of tables ----------
+\tableofcontents
+\cleardoublepage
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\cleardoublepage
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\cleardoublepage
+
+%==============================================================================
+%  MAIN MATTER
+%==============================================================================
+\pagenumbering{arabic}
+
+%==============================================================================
+\chapter{Introduction}
+%==============================================================================
+
+\section{Problem Specification}
+Bangladeshi supershops --- the Shwapno, Meena Bazar and Unimart class, plus hundreds of
+mid-size local chains --- typically run their branches on a patchwork of tools. Imported
+point-of-sale software does not understand Bangladesh VAT: shelves here display
+VAT-inclusive prices, output VAT must be back-calculated per National Board of Revenue
+(NBR) rate slab (0\%, 7.5\%, 15\%), and foreign products price in dollars per month.
+Purchasing lives in spreadsheets, loyalty lives in notebooks, and wastage is tracked
+nowhere at all. The owner finds out about problems weeks late: stock that walked out the
+door, batches that expired on the shelf, and margins that quietly eroded. Local cash
+registers record sales but cannot answer ``who voided this bill?'', cannot reconcile the
+drawer at day close, and cannot produce the VAT summary the tax office expects.
+
+The problem is sharpened by what a course project usually produces. An earlier e-commerce
+demonstration built by this team exhibited the classic flaws: no real login, the role taken
+from a URL parameter, one shared cart for every visitor, a tax figure that was displayed
+but never charged, and stock that evaporated on every restart. Each of those flaws
+represents a class of real business failure --- unauthorized access, privilege escalation,
+data races, phantom revenue and data loss.
+
+These gaps motivated MartFlow, a single suite in which the money path is honest by
+construction: prices are VAT-inclusive with per-slab back-calculation, every amount is an
+exact decimal, every void and return is fully reversed and audited, and the drawer
+reconciles by hand at day close.
+
+\section{Objectives}
+The principal objectives of the project were:
+\begin{enumerate}
+  \item To build a complete supershop management system with a vanilla-JavaScript
+        single-page front end, a Java~17 / Spring Boot~3.4.0 application layer and a
+        MongoDB Atlas data layer with an in-memory fallback.
+  \item To implement point-of-sale billing that matches how Bangladeshi shelves actually
+        work: VAT-inclusive pricing with NBR slab back-calculation, per-piece and weighed
+        goods, combo hampers, and split tenders over cash, card, bKash, Nagad and loyalty
+        points.
+  \item To keep inventory truthful: cost and MRP per item, batch and expiry tracking,
+        reorder levels, and damage/loss/theft write-offs (shrinkage) as first-class events.
+  \item To manage the purchasing cycle end to end: suppliers with payment terms, purchase
+        orders with a guarded state machine, goods receipts that land stock with batch and
+        updated cost, payables, and weekly restock templates.
+  \item To enforce exact-decimal money (\texttt{BigDecimal}, scale~2, \texttt{HALF\_UP})
+        through a single choke point, and business time pinned to Asia/Dhaka.
+  \item To secure the platform with PBKDF2-hashed passwords, bearer tokens and four roles
+        (owner, manager, cashier, developer) enforced in three layers, from the menu down
+        to the data boundary.
+  \item To make the shop accountable: an append-only activity log of every sensitive
+        action, and a day-close Z-report whose expected-drawer formula reconciles by hand.
+  \item To apply 18 GoF design patterns --- and only where a real feature needs each ---
+        protected by 176 hermetic automated tests, and to expose that reasoning inside the
+        product through a dedicated Developer Mode.
+\end{enumerate}
+
+\section{Scope}
+The delivered system covers staff authentication and role-based access control; POS
+billing with undo, coupons, charges and split tender; inventory with batches, expiry,
+reorder views and shrinkage adjustments; the purchasing cycle with suppliers, purchase
+orders, goods receipts, payments, closing and standing restock templates; promotions
+(category sales, member pricing and coupon codes) with a live tester; a loyalty program
+with points earned and redeemed at the till; partial per-line returns with pro-rata
+refunds and manager-side voids; a sales explorer with reprint; a day-close Z-report with
+drawer variance; automatic alerts with a suggestion service; an append-only activity log;
+eight report types with CSV export and an operational dashboard; staff management; and a
+Developer Mode for pattern inspection, API exploration and diagnostics.
+
+Out of scope for this version, and discussed under future work, are: native mobile
+applications; a multi-branch synchronisation server; real merchant integrations with bKash,
+Nagad or card acquirers (vendor-shaped SDKs are simulated behind adapters); offline-first
+billing with background reconciliation; barcode-printer and cash-drawer hardware; and
+machine-learning analytics. Client-side internet access is required for the Bootstrap CDN.
+
+\section{Flow of the Project}
+Development was organized into six phases:
+\begin{description}[leftmargin=2.2em]
+  \item[Phase 1 --- Planning \& Design (Weeks 1--2):] Requirements gathered from real
+        supershop workflows (billing, purchasing, day close), the 18-pattern mapping was
+        drawn, the entity-relationship model of the 11 collections was designed, and UI
+        wireframes were sketched.
+  \item[Phase 2 --- Domain \& Back-End Development (Weeks 3--5):] The framework-free
+        domain (billing, catalog, inventory, pricing, payment, suppliers, reports) with
+        its design patterns, the persistence layer with Atlas and in-memory repositories,
+        PBKDF2 authentication, and all 15 REST controllers.
+  \item[Phase 3 --- Front-End Development (Weeks 6--9):] The SPA shell, hash router with
+        its role gate, the POS screen, and the management screens (inventory, purchasing,
+        loyalty, returns, reports, sales explorer).
+  \item[Phase 4 --- Feature Enhancement (Weeks 10--11):] The accountability layer:
+        day-close Z-report, audit trail, promotions manager, sales explorer and Developer
+        Mode.
+  \item[Phase 5 --- Testing \& QA (Weeks 12--13):] The hermetic 176-test suite, restart
+        drills against Atlas (byte-identical receipt reprints), drawer-math checks and
+        security hardening.
+  \item[Phase 6 --- Documentation \& Presentation (Weeks 14--15):] README and Bengali
+        companion documentation, drift guards, this report and the presentation.
+\end{description}
+
+\section{Organization of the Project Report}
+The remainder of this report is organized into six chapters.
+\textbf{Chapter~2} surveys existing systems and the supporting literature.
+\textbf{Chapter~3} presents the system analysis and design --- the technology stack, the
+development model, the system architecture, the applied GoF design patterns, the use-case,
+context and data-flow diagrams, the database schema, and the core algorithms.
+\textbf{Chapter~4} describes the implementation of the front end and back end and
+enumerates the functional modules. \textbf{Chapter~5} is a user manual covering system
+requirements and interface walkthroughs. \textbf{Chapter~6} concludes with a discussion of
+limitations and future work, followed by the references and the appendices
+(Appendix~\ref{app:glossary}: glossary, key API endpoints and the project timeline).
+
+%==============================================================================
+\chapter{Background and Related Works}
+%==============================================================================
+
+\section{Existing System Analysis}
+Several classes of software already serve parts of the supershop problem, but each leaves
+gaps that a Bangladeshi branch feels daily. Table~\ref{tab:competitors} summarises the
+most relevant of them.
+
+\begin{table}[H]
+\centering
+\caption{Comparative analysis of existing platforms.}
+\label{tab:competitors}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{l X X}
+\toprule
+\textbf{Platform} & \textbf{Strengths} & \textbf{Weaknesses} \\
+\midrule
+Shopify POS & Polished till UX, huge app ecosystem, omnichannel inventory &
+Dollar-priced subscription; no NBR VAT slabs or VAT-inclusive back-calculation; no bKash /
+Nagad / points tenders \\
+Square POS & Clean hardware and offline-till pedigree, strong analytics &
+Not available in Bangladesh; foreign tax model; no local payment rails \\
+Lightspeed Retail & Deep inventory with purchasing and vendor management &
+Expensive per-month pricing; cloud-only; BD VAT and drawer-reconciliation workflows absent \\
+TallyPrime (ERP class) & Accounting-grade ledgers, used widely in Bangladesh,
+tax summaries & Till-first workflow weak; clerk training burden; POS, loyalty and returns
+feel bolted on \\
+Local legacy POS software & Cheap, offline, Bengali-friendly &
+No batch/expiry or shrinkage tracking; no day-close reconciliation; little or no audit
+trail; stale UIs; purchasing still in spreadsheets \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The recurring gaps identified were:
+\begin{itemize}
+  \item No VAT-inclusive pricing with NBR slab back-calculation (0\%, 7.5\%, 15\%) feeding
+        a filing-ready VAT summary.
+  \item No split tender across cash, card, bKash, Nagad and loyalty points in one bill.
+  \item No single system joining purchasing (with a guarded order lifecycle) to the shelf,
+        the till, returns, and a reconciled day close.
+  \item No accountability layer: an append-only audit trail with the actor behind every
+        void, return and price edit, and a Z-report whose drawer math reconciles by hand.
+  \item No affordable, zero-configuration option a mid-size branch can actually run ---
+        and no transparency about the engineering underneath.
+\end{itemize}
+
+MartFlow addresses every one of these gaps in one suite, and its Developer Mode makes the
+design-pattern reasoning behind each decision inspectable from inside the running product.
+
+\section{Supporting Literatures}
+The work draws on several bodies of knowledge --- Bangladeshi retail and VAT practice, the
+classic design-patterns catalogue, layered web architecture, authentication frameworks, and
+the specific front-end and back-end technologies employed.
+
+\paragraph{Retail domain and Bangladesh VAT.} The Value Added and Supplementary Duty Act
+2012 governs the slabs applied here; supershop shelves display VAT-inclusive prices, so the
+system back-calculates output VAT per line using
+$\mathrm{VAT} = \mathrm{net} \times r/(100+r)$ in one shared \texttt{VatCalculator}, and
+the VAT summary report groups taxable value and output VAT by slab --- the format a filing
+expects. The day-close Z-report mirrors the physical practice of drawer reconciliation at
+shift end.
+
+\paragraph{Design patterns.} The Gang-of-Four catalogue~\cite{gof} and its modern
+teaching treatments~\cite{headfirst,refactoringguru} supplied the vocabulary. The project's
+rule is stricter than the syllabus: a pattern earns its place only by carrying a real
+feature. Three patterns that were dead code in the earlier demonstration (Prototype, a tax
+visitor, a customer observer) were rebuilt into load-bearing features --- weekly restock
+templates, the NBR VAT report and live loyalty points respectively --- and several
+candidates were deliberately rejected (Section~\ref{sec:patterns}).
+
+\paragraph{Architecture.} The system follows a classical three-tier pattern with a strict
+layer rule: a browser-served SPA presentation layer, an application layer of thin Spring
+controllers over plain-Java facades and services, and a data layer behind a generic
+repository interface~\cite{cleanarch,sommerville}. The domain contains no framework
+annotations at all; Spring appears only in the controllers, one filter and one
+configuration class that assembles the object graph --- which is exactly what keeps the
+patterns honest and the domain unit-testable.
+
+\paragraph{Authentication and authorization.} Passwords are hashed with PBKDF2 as
+specified in RFC~8018~\cite{rfc8018} (120{,}000 iterations, per-user salt, constant-time
+comparison), following the OWASP password-storage guidance~\cite{owasp}. Sessions are
+256-bit random bearer tokens with a sliding 12-hour lifetime. Authorization follows
+role-based access control enforced server-side; the caller's role never travels in the
+request body, and a ThreadLocal request context is always cleared in a \texttt{finally}
+block~\cite{owasp,fielding}.
+
+\paragraph{Front-end stack.} The user interface is deliberately framework-free: vanilla
+JavaScript with a hash router (no server route coupling, trivial hosting), the Fetch API
+with a Bearer header~\cite{mdnjs,mdnfetch}, and Bootstrap~5.3.3~\cite{bootstrap} with
+Bootstrap Icons~\cite{bootstrapicons} for a familiar, responsive component vocabulary.
+
+\paragraph{Back-end stack and persistence.} Spring Boot~3.4.0~\cite{springboot} supplies
+the embedded server, serialization and test tooling; the MongoDB Java
+driver~\cite{mongodriver} talks to MongoDB Atlas~\cite{mongodb,atlas} through hand-written
+repositories and document mappers rather than a heavy data framework, keeping the
+persistence boundary explicit. Money is persisted as exact decimal strings so no digit is
+ever lost across a round trip~\cite{effectivejava}. The build, dependency management and
+test lifecycle run on Apache Maven~\cite{maven} with JUnit~5 and MockMvc~\cite{junit5,
+springtest}.
+
+\section{Problem Statement and Research Gap}
+The specific problem this project solves can be stated as follows:
+\emph{Bangladeshi supershop branches lack an affordable, integrated retail management
+platform that simultaneously provides (a) VAT-inclusive POS billing compliant with NBR
+slab rates, (b) batch-aware inventory with expiry and shrinkage control, (c) supplier
+purchasing with a guarded order lifecycle, (d) promotions and loyalty applied at the till,
+(e) partial returns and voids with complete reversal, (f) a reconciled day-close Z-report,
+and (g) an append-only audit trail of every sensitive action.} Existing solutions each
+satisfy at most one or two of these requirements. MartFlow is the integrated response to
+that research gap.
+
+%==============================================================================
+\chapter{System Analysis and Design}
+%==============================================================================
+
+\section{Technology and Tools}
+
+\subsection{Front-End Stack}
+The presentation tier is intentionally framework-free; its technologies and their roles
+are summarised in Table~\ref{tab:frontend}.
+
+\begin{table}[H]
+\centering
+\caption{Front-end technologies and their roles.}
+\label{tab:frontend}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Technology} & \textbf{Version} & \textbf{Role} \\
+\midrule
+HTML5 / CSS3 & --- & SPA shell (\texttt{index.html}), custom emerald theme,
+thermal-receipt styling (671-line stylesheet) \\
+JavaScript (ES2020+) & --- & All view logic, routing, API calls and receipt printing;
+no framework by design \\
+Bootstrap & 5.3.3 & Responsive layout and component vocabulary (CDN) \\
+Bootstrap Icons & 1.11.3 & Icon set (CDN) \\
+Fetch API / localStorage & browser-native & Authenticated API calls with the Bearer
+token; token persistence across reloads \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Back-End Stack}
+Table~\ref{tab:backend} lists the application-tier technologies; the Spring footprint is
+deliberately the smallest workable set.
+
+\begin{table}[H]
+\centering
+\caption{Back-end technologies and their roles.}
+\label{tab:backend}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Technology} & \textbf{Version} & \textbf{Role} \\
+\midrule
+Java & 17 & Language for the entire application and domain \\
+Spring Boot & 3.4.0 & Embedded Tomcat, REST plumbing, JSON serialization; the only
+Spring pieces used (starter-web) \\
+MongoDB Java Driver & sync (BOM-managed) & Direct Atlas access through hand-written
+repositories and document mappers \\
+JUnit 5 + MockMvc & via starter-test & The 176-test hermetic suite \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Database}
+When the \texttt{MONGODB\_URI} environment variable points at a reachable MongoDB Atlas
+cluster, all data persists to Atlas (default database \texttt{martflow}); when it is absent
+or unreachable, the same generic repository interface transparently serves an in-memory
+implementation so the demonstration runs with zero configuration --- never half Mongo,
+half memory, because all eleven repositories switch in one shot. The eleven collections
+are listed in Table~\ref{tab:collections}.
+
+\begin{table}[H]
+\centering
+\caption{MongoDB collections (repositories).}
+\label{tab:collections}
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Collection} & \textbf{Purpose} \\
+\midrule
+products & Catalog items: unit / weighed / combo, cost and MRP, VAT category, stock,
+reorder level, batches with expiry \\
+users & Staff accounts: PBKDF2 hash, role, active flag \\
+sales & Completed bills with self-contained line snapshots, tender split, VAT, status \\
+returns & Per-line returns with reasons, channels and pro-rata refund amounts \\
+customers & Loyalty members: unique phone, card number, points balance \\
+promotions & Category sales, member pricing and coupon codes with date windows \\
+suppliers & Distributors with contact details and payment terms (Net 7/15/30) \\
+purchaseOrders & POs with status, lines, goods receipts and payments \\
+orderTemplates & Standing weekly restock templates (Prototype source) \\
+auditLogs & Append-only activity trail (capped at 500 entries) \\
+dayCloses & Z-reports: window, tender splits, counted vs expected cash, variance \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Tools Used}
+Table~\ref{tab:tools} lists the supporting tools used across development, testing and
+documentation.
+
+\begin{table}[H]
+\centering
+\caption{Development and deployment tools.}
+\label{tab:tools}
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Tool} & \textbf{Purpose} \\
+\midrule
+Apache Maven (wrapper) & Build, dependency management, test lifecycle; runs with
+\texttt{mvnw.cmd} and no local install \\
+Visual Studio Code & Editing across Java, JavaScript, CSS and LaTeX \\
+Git \& GitHub & Version control and collaboration \\
+Postman & Manual API exercising during development \\
+MongoDB Atlas & Free-tier cloud database and data browser \\
+JUnit 5 / MockMvc & Automated hermetic testing \\
+Mermaid & Diagramming for this report (architecture, DFD, ER, flows) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Development Model}
+The project followed an incremental model: the money path (catalog, billing, persistence)
+was built first and kept runnable at all times, and management features were added as
+vertical slices, each closed by tests before the next slice began. This fit a three-member
+team with one shared codebase: increments were small enough to review, and the
+framework-free domain let back-end and front-end work proceed in parallel against a stable
+API. Table~\ref{tab:sprints} summarises the phases and Figure~\ref{fig:gantt} the
+timeline.
+
+\begin{table}[H]
+\centering
+\caption{Sprint plan and deliverables.}
+\label{tab:sprints}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Phase} & \textbf{Duration} & \textbf{Deliverable} \\
+\midrule
+Planning \& Design      & Weeks 1--2   & Requirements, 18-pattern map, ER model,
+wireframes \\
+Domain \& Back-End      & Weeks 3--5   & Pattern-bearing domain, persistence +
+fallback, auth, 15 controllers / 62 endpoints \\
+Front-End               & Weeks 6--9   & SPA shell, router + role gate, POS screen,
+management screens \\
+Feature Enhancement     & Weeks 10--11 & Day-close, audit trail, promotions manager,
+sales explorer, Developer Mode \\
+Testing \& QA           & Weeks 12--13 & 176 hermetic tests, restart drills,
+drawer-math checks, hardening \\
+Documentation           & Weeks 14--15 & README, Bengali companion doc, drift guards,
+this report, presentation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{gantt-sprints.png}
+\caption{Fifteen-week sprint plan Gantt chart.}
+\label{fig:gantt}
+\end{figure}
+
+\section{System Architecture}
+MartFlow is a three-tier web application (Figure~\ref{fig:arch}). The browser runs the
+vanilla-JavaScript SPA; every request carries the Bearer token through the
+\texttt{AuthFilter}, which resolves the caller into a ThreadLocal role context. The 15
+REST controllers are deliberately thin --- each handler is essentially one facade call ---
+so HTTP concerns never leak into business logic. The facades (\texttt{MartFlowFacade},
+\texttt{BillingFacade}, \texttt{PurchasingService} and siblings) orchestrate the plain-Java
+domain packages where the 18 design patterns live. At the data boundary a protection proxy
+re-checks role policy on product writes before the generic repository interface forwards
+to either MongoDB Atlas or the in-memory fallback. Spring wires this entire object graph
+in a single configuration class of 11 bean methods; the domain itself contains no
+framework annotation at all.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{system-architecture.png}
+\caption{Three-tier system architecture of MartFlow.}
+\label{fig:arch}
+\end{figure}
+
+\section{GoF Design Patterns Applied}
+\label{sec:patterns}
+Because this project is, by course, a design-pattern project, the pattern catalogue is
+treated as part of the system design rather than an implementation accident. The governing
+rule was \emph{a pattern earns its place only by carrying a real feature}. Exactly 18
+patterns are applied --- 4~creational, 5~structural and 9~behavioral --- a split asserted
+by an automated test, and each pattern is bound to the business reason it exists, as
+Table~\ref{tab:patterns} documents.
+
+\begin{longtable}{p{2.9cm}p{4.3cm}p{7.2cm}}
+\caption{The 18 GoF design patterns applied in MartFlow.}
+\label{tab:patterns}\\
+\toprule
+\textbf{Pattern} & \textbf{Where} & \textbf{Business reason} \\
+\midrule
+\endfirsthead
+\caption[]{(continued) The 18 GoF design patterns applied in MartFlow.}\\
+\toprule
+\textbf{Pattern} & \textbf{Where} & \textbf{Business reason} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+Singleton & \texttt{InventoryCatalog}, \texttt{DatabaseConnection} & One stock truth
+per process; two catalogs would oversell the same shelf. \\
+Factory Method & \texttt{ProductFactory} with \texttt{Unit}- and
+\texttt{WeighedProductFactory} & The add-item form creates per-piece and per-kg items
+through one path; no type \texttt{if/else}. \\
+Builder & \texttt{PurchaseOrderBuilder} & A PO is assembled line by line with
+validation; no half-configured order can escape into the workflow. \\
+Prototype & \texttt{StandingOrderTemplate} & The weekly restock list is cloned into a
+draft --- two clicks instead of fifteen. \\
+Adapter & \texttt{payment/} cash, card, bKash, Nagad, points adapters over vendor-shaped
+SDKs & Five very different tender channels behind one port; the till never branches on
+payment type. \\
+Decorator & \texttt{LineDiscount}, \texttt{CarryBagFee}, \texttt{DeliveryFee},
+\texttt{RoundOffAdjustment} & Charges and promotions stack on any bill line without
+touching the line classes. \\
+Facade & \texttt{MartFlowFacade}, \texttt{BillingFacade} & Every UI button is one call;
+controllers stay one line and testable. \\
+Proxy (protection) & \texttt{RoleGuardProxy} over the repositories & A cashier cannot
+reprice the catalog even through a buggy endpoint --- enforced at the data boundary. \\
+Composite & \texttt{ComboProduct} & An Eid hamper is priced and stocked from its
+components; selling one consumes each component truthfully (stock = the scarcest). \\
+Observer & \texttt{AlertService}, \texttt{ReorderSuggestionObserver},
+\texttt{StockSubject} & Low stock, near-expiry batches and wastage raise alerts by
+themselves; low stock even drafts the reorder suggestion. \\
+Strategy & \texttt{RegularPrice}, \texttt{CategorySale}, \texttt{MemberPrice} +
+\texttt{PromotionEngine} & Managers toggle promotions per date window; the till's pricing
+code never changes. \\
+Command & \texttt{billing/commands/} + void pipeline & Tender is a transaction: a
+declined card rolls back stock, points and the sale itself in reverse order. \\
+Template Method & \texttt{AbstractReportGenerator} + 8 concrete reports & A new report
+is three hooks; ``VOIDED never counts as revenue'' is decided exactly once. \\
+Chain of Responsibility & \texttt{billing/validation/} --- 6 ordered rules & The cashier
+sees the exact first failing rule (empty bill, weighment, stock, coupon, loyalty,
+tender). \\
+State & \texttt{suppliers/postate/} --- 6 purchase-order states & A draft PO physically
+cannot be received; a closed one cannot be cancelled. \\
+Visitor & \texttt{VatVisitor}, \texttt{ProfitVisitor},
+\texttt{ReceiptFormatterVisitor} & The same bill lines feed VAT filing, margin analysis
+and receipt layout --- including sales reloaded from the database. \\
+Memento & \texttt{BillMemento} (per-session undo stack, depth 10) & Mis-scans happen
+every minute at a real till; the cashier's Undo is a money feature. \\
+Iterator & \texttt{catalog/iter/} --- in-stock, low-stock, expiring, price-range & The
+low-stock view and the low-stock report walk the same iterator --- they can never
+disagree. \\
+\end{longtable}
+
+Two deliberate asymmetries are part of the design answer. A sale's status is a plain enum
+while purchase orders get the full State pattern, because a sale has no long-lived
+per-status behaviour (void and return are one-shot operations), whereas a PO sits for days
+in states with genuinely different allowed operations. And several pattern candidates
+were rejected on the merits: the audit trail does not use Observer (stock events carry no
+actor or intent), the Z-report does not use the report Template Method (its
+``VOIDED never counts'' invariant is exactly what a Z-report must break for cash
+purposes), and no nineteenth pattern was added for symmetry. The rejection rationale is
+written into each service's documentation --- the ``why not'' is part of the answer.
+
+\section{Use-Case Analysis}
+Four actors interact with the system. The cashier runs the till; the manager (who
+inherits every cashier use case) runs the floor; the owner (who inherits every manager
+use case) additionally controls the catalog's destruction and the staff accounts; and a
+developer account exists solely for examination --- it sees the till-side screens and the
+Developer Mode, but holds no business power. Table~\ref{tab:usecases} summarises the
+principal use cases and Figure~\ref{fig:usecase} shows the diagram.
+
+\begin{table}[H]
+\centering
+\caption{Use-case summary by actor.}
+\label{tab:usecases}
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Actor} & \textbf{Representative use cases} \\
+\midrule
+Cashier & Log in; scan and bill items (unit, weighed, combo); attach loyalty member and
+coupon; split tender across five channels; undo mis-scans; print receipt; process
+returns; register loyalty member; view operational reports; read alerts \\
+\addlinespace
+Manager & Inherits all cashier use cases; manage catalog items (add, edit, restock,
+adjust); manage promotions and test coupons; manage suppliers, purchase orders, goods
+receipts, payments and restock templates; void sales with a reason; run financial
+reports; close the day (Z-report); inspect the activity log \\
+\addlinespace
+Owner (admin) & Inherits all manager use cases; delete catalog items; manage staff
+accounts (create, disable, reset password) \\
+\addlinespace
+Developer & Till-side screens as the cashier; open Developer Mode (pattern catalogue,
+API explorer, diagnostics) --- and nothing else \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{use-case.png}
+\caption{System Use Case Diagram.}
+\label{fig:usecase}
+\end{figure}
+
+\section{Context-Level Diagram (DFD-0)}
+The context diagram (Figure~\ref{fig:dfd0}) shows MartFlow as a single process exchanging
+flows with its external entities: the three staff roles, the payment vendors whose
+SDK shapes sit behind the adapters, and the MongoDB Atlas data store.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{dfd-0.png}
+\caption{Context-level diagram (DFD-0).}
+\label{fig:dfd0}
+\end{figure}
+
+\section{Data-Flow Diagram (DFD-1)}
+The first-level decomposition (Figure~\ref{fig:dfd1}) breaks the system into eight
+cooperating processes --- authentication and access, catalog and inventory, POS billing
+and tender, returns and voids, purchasing, promotions and loyalty, reports and day close,
+and alerts with audit --- all of which read from and write to the shared data stores.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{dfd-1.png}
+\caption{First-level data-flow diagram (DFD-1).}
+\label{fig:dfd1}
+\end{figure}
+
+\section{Database Schema}
+The entity relationships among the eleven collections are shown in
+Figure~\ref{fig:erdiagram}. Money is stored as exact decimal strings and sale lines are
+self-contained snapshots (name, SKU, price, VAT rate and cost frozen at sale time), which
+is what lets a receipt reloaded from the database reconstruct into the identical item
+chain and print byte-identically. Selected field-level detail is given in
+Table~\ref{tab:schema}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{er-diagram.png}
+\caption{Entity-relationship overview of the MartFlow database.}
+\label{fig:erdiagram}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Selected schema field detail.}
+\label{tab:schema}
+\small
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Model} & \textbf{Key field} & \textbf{Notes} \\
+\midrule
+Product & \texttt{type} & Enum \texttt{UNIT} / \texttt{WEIGHED} / \texttt{COMBO};
+batches embedded with batch no and expiry; VAT rate resolved through the category \\
+Sale & \texttt{status} & Enum \texttt{COMPLETED} / \texttt{PARTIALLY\_RETURNED} /
+\texttt{RETURNED} / \texttt{VOIDED}; lines are self-contained snapshots; money stored as
+exact decimal strings \\
+SaleReturn & \texttt{lines} & Per-line quantity and reason; pro-rata refund amounts;
+channel defaults to the original tender \\
+User & \texttt{passwordHash} & \texttt{base64(salt):base64(key)} PBKDF2 format; role
+enum; \texttt{active} flag for disable instead of delete \\
+PurchaseOrder & \texttt{status} & Six states guarded by the State pattern
+(\texttt{DRAFT} \textrightarrow{} \texttt{ORDERED} \textrightarrow{}
+\texttt{PARTIALLY\_RECEIVED} \textrightarrow{} \texttt{RECEIVED} \textrightarrow{}
+\texttt{CLOSED}, plus \texttt{CANCELLED}); receipts and payments embedded \\
+Promotion & \texttt{type} & Enum \texttt{CATEGORY\_SALE} / \texttt{MEMBER\_PRICE} /
+\texttt{COUPON\_FLAT} / \texttt{COUPON\_PERCENT}; active date window \\
+Customer & \texttt{phone} & Unique key for till lookup; integer points balance \\
+AuditLog & \texttt{action} & Append-only; capped at 500 entries; actor always recorded \\
+DayClose & \texttt{variance} & \texttt{countedCash} minus \texttt{expectedCash}; zero
+renders as balanced \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Sequence Diagram}
+The sequence diagram (Figure~\ref{fig:seqdiagram}) illustrates the execution flow for
+the system's money path --- tendering a bill. The validation chain runs first and stops
+the request on the exact first failing rule; the command pipeline then reserves stock,
+charges the tenders, awards points and persists the sale; and a declined card triggers a
+last-in-first-out rollback so that, from the shop's point of view, nothing happened.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{sequence-pos-sale.png}
+\caption{Sequence Diagram for POS tender with rollback.}
+\label{fig:seqdiagram}
+\end{figure}
+
+\section{Activity Diagram}
+The activity diagram (Figure~\ref{fig:actdiagram}) details the cashier's primary journey
+--- building a bill and taking payment --- including the weighment and validation loops
+the till enforces.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{activity-billing.png}
+\caption{Activity Diagram for the POS billing journey.}
+\label{fig:actdiagram}
+\end{figure}
+
+\section{State Transition: Purchase Order Lifecycle}
+Purchase orders are the system's clearest stateful entity, and the State pattern guards
+their six states (Figure~\ref{fig:postate}): a draft physically cannot be received, and a
+closed order cannot be cancelled --- the states refuse illegal operations themselves
+rather than relying on the caller's discipline.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{state-po-lifecycle.png}
+\caption{Purchase-order state machine (State pattern).}
+\label{fig:postate}
+\end{figure}
+
+\section{Algorithms and Flowcharts}
+
+\subsection{VAT Back-Calculation per NBR Slabs}
+Shelf prices in Bangladesh are VAT-inclusive, so output VAT must be derived, not added.
+For a line with net amount $n$ and category rate $r \in \{0, 7.5, 15\}$ percent, the
+line's output VAT is
+\begin{equation}
+\mathrm{VAT} = n \times \frac{r}{100 + r},
+\end{equation}
+computed in \texttt{BigDecimal} at scale~2 with \texttt{HALF\_UP} rounding, per line
+first and summed afterwards. Worked examples pinned by tests: 115.00 at 15\% gives
+15.00; 107.50 at 7.5\% gives 7.50; 99.00 at 0\% gives 0.00. Figure~\ref{fig:vatflow}
+shows the flow.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{flow-vat-calculation.png}
+\caption{VAT back-calculation flowchart (NBR slabs).}
+\label{fig:vatflow}
+\end{figure}
+
+\subsection{Tender Command Pipeline with Rollback}
+Tender is modelled as a command transaction: four commands run in order
+(reserve stock, charge tenders, award points, create the sale), and any exception
+triggers a last-in-first-out, best-effort undo of the commands already executed --- each
+undo wrapped in its own \texttt{try/catch} so one failure cannot mask another. A
+declined card therefore leaves no reserved stock, no awarded points and no sale; the API
+answers 409 and the cashier sees exactly what went wrong. The same three-command shape
+(reserve, refund, mark voided) reverses a voided sale. Figure~\ref{fig:tenderflow}
+shows the flow.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{flow-tender-rollback.png}
+\caption{Tender command pipeline with LIFO rollback.}
+\label{fig:tenderflow}
+\end{figure}
+
+\subsection{Authentication Flow}
+Every staff member authenticates the same way: the SPA posts credentials to
+\texttt{POST /api/auth/login}; the server verifies the PBKDF2 hash (running a dummy
+verification on unknown usernames so timing cannot reveal which accounts exist) and
+issues a 256-bit random hex token with a sliding 12-hour lifetime. Every subsequent
+request carries the token as a Bearer header; the \texttt{AuthFilter} resolves it to a
+caller and stores it in a ThreadLocal role context that is cleared in a
+\texttt{finally} block, after which controller-level role gates and the data-boundary
+proxy enforce policy. Figure~\ref{fig:authflow} shows the flow.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{auth-flow.png}
+\caption{Authentication and authorization flow.}
+\label{fig:authflow}
+\end{figure}
+
+%==============================================================================
+\chapter{Implementation}
+%==============================================================================
+
+\section{Front-End / Interface Design}
+The user interface is a framework-free single-page application of roughly 2{,}800 lines
+of JavaScript across eight modules, served by the back end from
+\texttt{src/main/resources/static/}. One HTML shell hosts a view host that the router
+fills; every screen is a render function registered against a route.
+
+\paragraph{Design system.} Bootstrap~5.3.3 supplies the layout and component vocabulary,
+restyled by a 671-line custom stylesheet around an emerald and gold palette; Bootstrap
+Icons~1.11.3 provides the iconography. A dark/light theme toggle is persisted per
+browser, and the thermal receipt is rendered in a fixed 38-column style that matches a
+320\,px slip.
+
+\paragraph{Routing and access control.} A 67-line hash router registers the 15 routes
+(each with a title, icon and role list). On every hash change it clears the previous
+view's cleanup callback, checks authentication, and enforces the role list --- a cashier
+navigating to a manager screen receives ``Your role cannot open that page'' and is
+redirected to the POS. The navigation bar itself is generated from the same route table,
+so menus and gates can never disagree.
+
+\paragraph{API layer.} A single \texttt{api.js} module wraps \texttt{fetch}: it attaches
+the Bearer token from \texttt{localStorage}, JSON-encodes bodies, unwraps the error
+contract (400 validation, 401 session-expired, 403 access denied, 409 conflict), and
+raises uniform toasts so individual views never duplicate error handling.
+
+\paragraph{Views.} Screen logic is split across three view modules: till-side screens
+(POS, receipt), operations (inventory, purchasing, loyalty, returns, alerts) and
+management (dashboard, sales explorer, promotions, reports, day close, activity log,
+staff, developer mode). The POS screen provides the scan box with live suggestions,
+category chips, a 24-tile quick-pick grid, per-line edit with a 0.25-step weight control,
+and an undo button that reflects the server-side memento depth.
+
+\paragraph{Receipt printing.} A dedicated receipt module renders the slip, supports
+thermal printing through a hidden iframe, copying the text, and saving it as a plain-text
+file; pressing Enter after a sale arms the next customer automatically.
+
+\section{Back-End}
+
+\paragraph{Entry point and wiring.} \texttt{MartFlowApplication} boots Spring with the
+Mongo auto-configuration excluded (the raw driver owns its client), and
+\texttt{AppConfig} is the single configuration class: eleven bean methods assemble the
+entire object graph as plain objects --- catalogs over a role-guarded repository,
+observers subscribed to stock events, facades receiving payment adapters and the
+promotion engine --- and run the seed data on first boot (37 products, 9 categories,
+4 promotions, 5 loyalty members, 3 suppliers and an in-flight purchase order).
+
+\paragraph{Request pipeline.} The \texttt{AuthFilter} validates the Bearer token against
+the token store, places the caller in the ThreadLocal \texttt{RoleContext}, and always
+clears it in a \texttt{finally} block (Listing~\ref{lst:rolecontext}); controllers then
+enforce policy with role gates before delegating one line to a facade. A global
+exception handler maps domain errors onto the HTTP contract.
+
+\begin{lstlisting}[language=Java,caption={Request context that never leaks between
+requests (simplified).},label={lst:rolecontext}]
+// AuthFilter, simplified
+try {
+    Caller caller = tokenStore.resolve(bearerToken);
+    RoleContext.set(caller);
+    chain.doFilter(request, response);
+} finally {
+    RoleContext.clear();  // no cross-request role leakage
+}
+\end{lstlisting}
+
+\paragraph{Controllers.} The 15 REST controllers expose 62 handler endpoints under
+\texttt{/api}; each is a thin translation between JSON and the facades, so business rules
+exist exactly once, in the domain. Selected endpoints are tabulated in
+Appendix~\ref{app:endpoints}.
+
+\paragraph{The money rule.} Every amount is a \texttt{BigDecimal} of scale~2 with
+\texttt{HALF\_UP} rounding produced through one \texttt{MoneyUtil} choke point;
+quantities carry scale~3 for weighed goods. Cash tenders round the payable to whole
+taka through a decorator that shows the adjustment on the receipt; card and mobile-wallet
+tenders do not round. Listing~\ref{lst:vat} shows the shared VAT calculation.
+
+\begin{lstlisting}[language=Java,caption={Inclusive-VAT back-calculation, the single
+source of NBR output VAT (simplified).},label={lst:vat}]
+// VatCalculator, simplified
+public BigDecimal vatOf(String categoryId, BigDecimal net) {
+    BigDecimal rate = categories.vatRate(categoryId); // 0, 7.5 or 15
+    if (rate.signum() == 0) return BigDecimal.ZERO;
+    return net.multiply(rate)
+              .divide(rate.add(HUNDRED), 2, RoundingMode.HALF_UP);
+}
+\end{lstlisting}
+
+\paragraph{Security design.} Authorization is enforced in three deliberate layers: the
+menu hides what a role cannot do (cosmetic), the controller role gate rejects the call
+(real), and the protection proxy re-checks policy on product writes at the data boundary
+(last line). The client never declares its role; it always derives from the token.
+Password hashing follows RFC~8018 (PBKDF2, 120{,}000 iterations, per-user salt,
+constant-time comparison), and unknown usernames run a dummy verification so response
+timing cannot enumerate accounts.
+
+\paragraph{Persistence.} A static selector probes the Atlas connection once at startup
+and wires all eleven repositories to either the Mongo implementations (with hand-written
+document mappers) or the in-memory fallbacks --- never a mixture. Money is stored as
+exact decimal strings, and sale lines are self-contained snapshots: a receipt reloaded
+from the database reconstructs the identical decorator chain and prints byte-identically,
+which is what keeps reprints and VAT filings from drifting from what was charged.
+
+\paragraph{Developer Mode and drift guards.} The developer-only endpoints serve an
+in-product catalogue of all 18 patterns (each card cites the real class, a real source
+snippet and the test that proves it), a live API explorer that fires any route with the
+caller's own token --- a 403 demonstrates the gate --- and system diagnostics. Two
+automated guards keep this documentation honest: one test walks the source tree and
+fails the build if a pattern card cites a class that does not exist, and a second
+asserts the API explorer's catalogue equals Spring's registered routes in both
+directions.
+
+\section{Modules and Features}
+The following 16 functional modules were implemented:
+
+\begin{enumerate}
+  \item \textbf{Authentication and Access Control} --- PBKDF2 login, bearer sessions,
+        four roles enforced from menu to data boundary, failed-login auditing.
+  \item \textbf{POS Billing} --- scan, search and quick-pick entry; weighed goods;
+        combos; per-line editing with undo (depth 10); customer, coupon and charge
+        attachment; split tender across five channels; thermal receipts.
+  \item \textbf{Inventory Management} --- cost/MRP per item, batches with expiry,
+        reorder levels, low-stock and expiring views, damage/loss/theft/count
+        adjustments with shrinkage alerts.
+  \item \textbf{Purchasing and PO Lifecycle} --- suppliers with payment terms, guarded
+        six-state purchase orders, goods receipts that land stock with batch and updated
+        cost, payment records, payables.
+  \item \textbf{Standing Restock Templates} --- weekly order lists saved as templates
+        and cloned into fresh drafts (two clicks instead of fifteen).
+  \item \textbf{Promotions Engine} --- date-windowed category sales, member pricing and
+        coupon codes with manager CRUD, a power toggle that reprices the till instantly,
+        and a live coupon tester.
+  \item \textbf{Loyalty Program} --- members by unique phone, points earned per 100 BDT
+        net, points redeemed as tender (1 point = 1 BDT), manager adjustments.
+  \item \textbf{Returns and Exchanges} --- partial per-line returns with pro-rata refunds
+        through the original channel, repeat-return protection, exchange as return plus
+        new bill.
+  \item \textbf{Sales Explorer and Void} --- every receipt with date/status/cashier
+        filters, one-click reprint, and manager void with a mandatory reason and full
+        reversal.
+  \item \textbf{Day-Close Z-Report} --- per-tender split, expected versus counted cash
+        with variance, printable Z-slip, history reprint; a sale voided today charges
+        today's drawer even if sold yesterday.
+  \item \textbf{Alerts} --- automatic low-stock, expiry, shrinkage, restock and
+        price-change alerts with a suggestion service, unread badge and mark-read.
+  \item \textbf{Activity Log} --- append-only audit of logins (including failures),
+        voids, returns, shrinkage, price edits, promotion changes, PO moves and staff
+        changes, always with the actor.
+  \item \textbf{Reports and Dashboard} --- eight report types (daily sales, best
+        sellers, low-stock worksheet, expiry watch, returns, staff performance, profit,
+        NBR VAT summary) each exportable to CSV, plus a six-KPI operations dashboard.
+  \item \textbf{Staff Management} --- owner-only account creation with role, disabling
+        and password reset.
+  \item \textbf{Developer Mode} --- pattern deep-dives, live API explorer and system
+        diagnostics, visible only to the developer account.
+  \item \textbf{Developer Diagnostics} --- persistence mode, active token, repository
+        counts, uptime and the Dhaka clock for examination and support.
+\end{enumerate}
+
+The dashboard's tender distribution over a seeded demonstration session is illustrated
+in Figure~\ref{fig:pietender}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.62\textwidth]{pie-tender-mix.png}
+\caption{Tender mix on the demonstration dashboard (illustrative data).}
+\label{fig:pietender}
+\end{figure}
+
+%==============================================================================
+\chapter{User Manual}
+%==============================================================================
+
+\section{System Requirements}
+
+\subsection{Hardware Requirements}
+Table~\ref{tab:hw} lists the minimum and recommended hardware for running the suite.
+
+\begin{table}[H]
+\centering
+\caption{Hardware requirements.}
+\label{tab:hw}
+\small
+\begin{tabularx}{\textwidth}{l X X}
+\toprule
+\textbf{Component} & \textbf{Minimum} & \textbf{Recommended} \\
+\midrule
+Processor & Intel Core i3 / AMD Ryzen 3 & Core i5 / Ryzen 5 or better \\
+RAM & 4\,GB & 8\,GB \\
+Storage & 1\,GB free (app + logs) & 5\,GB free (Atlas is cloud-hosted) \\
+Display & 1366$\times$768 & 1920$\times$1080 \\
+Peripherals & Keyboard; barcode scanner (optional) & Scanner + thermal printer \\
+Network & Broadband for Atlas and the CDN & Stable broadband \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Software Requirements}
+\paragraph{For users.} Any modern desktop or tablet browser (Chrome, Edge, Firefox or
+Safari, current versions) with JavaScript enabled and internet access for the Bootstrap
+CDN; no installation is needed on the till machine beyond the browser.
+\paragraph{For local development.} Windows 10/11 (or any OS), JDK~17 or newer, the
+included Maven wrapper (no separate Maven install), optionally a free MongoDB Atlas
+account with a connection string, Visual Studio Code and Git.
+
+\section{User Interfaces}
+
+\subsection{Panel A --- Till-Side Screens}
+The cashier logs in and lands on the POS (Figure~\ref{fig:pos}): a scan box with live
+suggestions, category chips and a quick-pick grid build the bill; per-line edit, undo and
+clear sit beside the totals ladder (Gross, Promotions, Coupon, charges, PAYABLE including
+VAT). Tendering opens the split-payment modal across cash, card, bKash, Nagad and points,
+and completes into the receipt (Figure~\ref{fig:receipt}) with its VAT breakdown, round-off
+line, transaction references and change; Enter returns the till to the next customer.
+
+\uifig{The POS billing screen.}{fig:pos}{figs/fig5_1_pos.png}
+\uifig{The printed thermal receipt.}{fig:receipt}{figs/fig5_2_receipt.png}
+
+\subsection{Panel B --- Operations Screens}
+Inventory (Figure~\ref{fig:inventory}) lists items with type badges, cost, MRP,
+stock highlighted when low, reorder levels and batch expiries; managers restock, adjust
+shrinkage and edit prices from here. Purchasing (Figure~\ref{fig:purchases}) hosts the
+purchase-order board with its state badges, the goods-receipt dialog that lands stock
+with batch and cost, supplier records with payment terms, and the standing templates that
+clone into weekly drafts. Promotions (Figure~\ref{fig:promotions}) manages the four
+promotion types with a live coupon tester, and returns reconcile receipts per line with
+pro-rata refunds.
+
+\uifig{Inventory with batches, reorder levels and shrinkage controls.}{fig:inventory}{figs/fig5_3_inventory.png}
+\uifig{Purchasing: PO board, goods receipts, suppliers and templates.}{fig:purchases}{figs/fig5_4_purchases.png}
+\uifig{Promotions manager with the live coupon tester.}{fig:promotions}{figs/fig5_7_promotions.png}
+
+\subsection{Panel C --- Management Screens}
+The dashboard (Figure~\ref{fig:dashboard}) shows the six operational KPIs --- net sales,
+bill count, average basket, output VAT, cash in drawer, low-stock and expiring counts ---
+with quick report links and the alert feed. The sales explorer filters every receipt and
+reprints or voids with a reason; day close (Figure~\ref{fig:dayclose}) previews the
+window's tender split, takes the counted drawer and prints the Z-slip with the variance;
+the activity log (Figure~\ref{fig:activity}) is the searchable audit trail; and Developer
+Mode (Figure~\ref{fig:developer}) exposes the 18 pattern cards, the API explorer and
+diagnostics to the examiner's account only.
+
+\uifig{The operations dashboard.}{fig:dashboard}{figs/fig5_5_dashboard.png}
+\uifig{Day-close Z-report with drawer variance.}{fig:dayclose}{figs/fig5_8_dayclose.png}
+\uifig{The append-only activity log.}{fig:activity}{figs/fig5_9_activity.png}
+\uifig{Developer Mode: pattern deep-dives with real source and tests.}{fig:developer}{figs/fig5_6_developer.png}
+
+\subsection{Login Credentials}
+The following demonstration accounts are seeded on first boot (change them before any
+real use):
+\begin{description}[leftmargin=1.5em]
+  \item[\textbf{Owner (admin):}] full access including staff management and item
+        deletion
+        \begin{itemize}
+          \item \textbf{Username:} \texttt{admin}
+          \item \textbf{Password:} \texttt{admin123}
+        \end{itemize}
+  \item[\textbf{Manager:}] catalog, purchasing, financial reports, voids, day close
+        \begin{itemize}
+          \item \textbf{Username:} \texttt{manager}
+          \item \textbf{Password:} \texttt{manager123}
+        \end{itemize}
+  \item[\textbf{Cashier:}] billing, returns, operational views
+        \begin{itemize}
+          \item \textbf{Username:} \texttt{cashier}
+          \item \textbf{Password:} \texttt{cashier123}
+        \end{itemize}
+  \item[\textbf{Developer:}] till-side screens plus Developer Mode only
+        \begin{itemize}
+          \item \textbf{Username:} \texttt{developer}
+          \item \textbf{Password:} \texttt{developer123}
+        \end{itemize}
+\end{description}
+
+\section{Getting Started}
+\begin{enumerate}
+  \item Install JDK~17 or newer and clone the repository.
+  \item Run the application with the included wrapper (no Maven install required):
+        \texttt{.\textbackslash mvnw.cmd spring-boot:run} --- the suite starts in
+        in-memory mode with seeded data and prints the demo logins.
+  \item Open \url{http://localhost:8080} and sign in with a demo account.
+  \item Optional, for durable storage: create a free MongoDB Atlas cluster, copy the
+        connection string, and set \texttt{MONGODB\_URI} (and optionally
+        \texttt{MONGODB\_DB}) as an environment variable or in a \texttt{.env} file ---
+        see \texttt{.env.example}. When Atlas is reachable, sales, stock, points and
+        purchase orders survive restarts.
+  \item Run the test suite any time with \texttt{.\textbackslash mvnw.cmd clean test}
+        (176 tests; the suite pins an invalid database URI so it can never touch a real
+        database).
+\end{enumerate}
+
+%==============================================================================
+\chapter{Conclusion}
+%==============================================================================
+
+\section{Conclusion}
+MartFlow matured into a complete supershop management suite: a vanilla-JavaScript SPA of
+15 role-gated routes over a Java~17 / Spring Boot~3.4.0 application layer of 15 REST
+controllers and 62 endpoints, a framework-free domain in which exactly 18 GoF design
+patterns (4~creational, 5~structural, 9~behavioral) each carry a real business feature,
+and a MongoDB Atlas data tier of 11 collections with a zero-configuration in-memory
+fallback. The money path is honest by construction --- VAT-inclusive NBR slab
+back-calculation, exact-decimal arithmetic, command transactions with rollback, and a
+day-close that reconciles by hand --- and the accountability layer (audit trail plus
+Z-report) answers ``who did what'' at any point. Security is enforced in three layers
+across four roles down to the data boundary, and 176 automated tests in 31 hermetic
+classes, together with the in-product Developer Mode and its drift guards, keep both the
+code and its documentation provable. The system is deployable today as a single
+executable JAR for a single branch, with persistence on Atlas or nothing at all.
+
+\section{Limitations}
+\begin{enumerate}
+  \item \textbf{Simulated vendor SDKs.} The card, bKash and Nagad integrations run
+        against vendor-shaped fakes; real merchant credentials would change only the ten
+        to fifteen lines inside each adapter, but are out of reach of a course project.
+  \item \textbf{CDN dependency.} Bootstrap loads from a CDN, so a fully offline till
+        needs pre-cached assets.
+  \item \textbf{In-memory sessions.} Login tokens and the alert feed are deliberately
+        ephemeral; a restart asks staff to sign in again (business data is never lost).
+  \item \textbf{No concurrency stress test.} Race defenses exist at three levels
+        (per-token bill sessions, synchronized stock movement, ThreadLocal contexts) and
+        are covered by single-request tests, but a dedicated multi-thread stress suite is
+        future work.
+  \item \textbf{Single branch.} One deployment serves one shop; multi-branch
+        synchronisation is not yet modelled.
+  \item \textbf{Online-only till.} Without connectivity to the server the till cannot
+        bill; offline-first operation with background reconciliation is future work.
+  \item \textbf{Illustrative analytics.} Dashboard aggregates and chart figures in this
+        report reflect seeded demonstration data rather than long-run production
+        history.
+\end{enumerate}
+
+\section{Future Works}
+The natural next steps follow the roadmap set during development: multi-branch
+synchronisation under one owner; offline-first billing with background reconciliation;
+real bKash, Nagad and card-acquirer integrations behind the existing adapter port;
+barcode-printer and cash-drawer hardware support; customer purchase-history analytics
+over the sale snapshots; and an approval workflow for purchase orders. On the engineering
+side: persisting sessions across restarts, a CountDownLatch-based concurrency stress
+suite, and an automated restart drill in continuous integration.
+
+%==============================================================================
+%  BACK MATTER
+%==============================================================================
+\begin{thebibliography}{99}
+\addcontentsline{toc}{chapter}{References}
+
+\bibitem{java17}     Oracle. ``Java SE 17 Documentation.'' Oracle Corporation,
+                     \url{https://docs.oracle.com/en/java/javase/17/}, 2026.
+\bibitem{springboot} VMware Tanzu. ``Spring Boot Reference Documentation, v3.4.0.''
+                     \url{https://docs.spring.io/spring-boot/3.4/}, 2026.
+\bibitem{spring}    VMware Tanzu. ``Spring Framework Documentation.''
+                     \url{https://docs.spring.io/spring-framework/reference/}, 2026.
+\bibitem{springtest} VMware Tanzu. ``Testing the Web Layer (MockMvc).'' Spring.io
+                     Guides, \url{https://spring.io/guides/gs/testing-web}, 2026.
+\bibitem{mongodb}   MongoDB, Inc. ``MongoDB Manual.''
+                     \url{https://www.mongodb.com/docs/manual/}, 2026.
+\bibitem{atlas}     MongoDB, Inc. ``MongoDB Atlas Documentation.''
+                     \url{https://www.mongodb.com/docs/atlas/}, 2026.
+\bibitem{mongodriver} MongoDB, Inc. ``MongoDB Java Driver (sync) Documentation.''
+                     \url{https://www.mongodb.com/docs/drivers/java/sync-current/}, 2026.
+\bibitem{maven}     Apache Software Foundation. ``Apache Maven Documentation.''
+                     \url{https://maven.apache.org/guides/}, 2026.
+\bibitem{junit5}    JUnit Team. ``JUnit 5 User Guide.''
+                     \url{https://junit.org/junit5/docs/current/user-guide/}, 2026.
+\bibitem{gof}       E.~Gamma, R.~Helm, R.~Johnson and J.~Vlissides, \emph{Design
+                     Patterns: Elements of Reusable Object-Oriented Software}.
+                     Reading, MA: Addison-Wesley, 1994.
+\bibitem{headfirst} E.~Freeman and E.~Robson, \emph{Head First Design Patterns},
+                     2nd~ed. Sebastopol, CA: O'Reilly Media, 2021.
+\bibitem{refactoringguru} Refactoring.Guru. ``Design Patterns.''
+                     \url{https://refactoring.guru/design-patterns}, 2026.
+\bibitem{effectivejava} J.~Bloch, \emph{Effective Java}, 3rd~ed. Boston, MA:
+                     Addison-Wesley, 2018 (Item~60: ``Avoid float and double if exact
+                     answers are required'').
+\bibitem{cleanarch} R.~C.~Martin, \emph{Clean Architecture: A Craftsman's Guide to
+                     Software Structure and Design}. Boston, MA: Prentice Hall, 2017.
+\bibitem{sommerville} I.~Sommerville, \emph{Software Engineering}, 10th~ed. Boston,
+                     MA: Pearson, 2016.
+\bibitem{fielding}  R.~T.~Fielding, ``Architectural Styles and the Design of
+                     Network-based Software Architectures,'' Ph.D. dissertation,
+                     University of California, Irvine, 2000.
+\bibitem{rfc8018}   K.~Moriarty, Ed., ``PKCS \#5: Password-Based Cryptography
+                     Specification Version 2.1,'' RFC~8018, Internet Research Task
+                     Force, 2017.
+\bibitem{owasp}     OWASP Foundation. ``Password Storage Cheat Sheet.''
+                     \url{https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html},
+                     2026.
+\bibitem{nbr}       National Board of Revenue, Government of Bangladesh. ``Value Added
+                     Tax and Supplementary Duty Act 2012 (as amended).'' Dhaka: NBR,
+                     2012.
+\bibitem{bootstrap} Bootstrap Team. ``Bootstrap 5.3 Documentation.''
+                     \url{https://getbootstrap.com/docs/5.3/}, 2026.
+\bibitem{bootstrapicons} Bootstrap Team. ``Bootstrap Icons.''
+                     \url{https://icons.getbootstrap.com/}, 2026.
+\bibitem{mdnjs}     Mozilla. ``JavaScript --- MDN Web Docs.''
+                     \url{https://developer.mozilla.org/en-US/docs/Web/JavaScript}, 2026.
+\bibitem{mdnfetch}  Mozilla. ``Fetch API --- MDN Web Docs.''
+                     \url{https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API}, 2026.
+\bibitem{mdnlocal}  Mozilla. ``Window: localStorage --- MDN Web Docs.''
+                     \url{https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage},
+                     2026.
+\bibitem{git}       Software Freedom Conservancy. ``Git Documentation.''
+                     \url{https://git-scm.com/doc}, 2026.
+\bibitem{postman}   Postman, Inc. ``Postman Documentation.''
+                     \url{https://learning.postman.com/docs/}, 2026.
+\bibitem{mermaid}   Mermaid. ``Mermaid Diagramming and Charting Documentation.''
+                     \url{https://mermaid.js.org/intro/}, 2026.
+\bibitem{dfd}       Lucidchart. ``What is a Data Flow Diagram.''
+                     \url{https://www.lucidchart.com/pages/data-flow-diagram}, 2026.
+\bibitem{usecase}   Creately. ``Use Case Diagram Tutorial.''
+                     \url{https://creately.com/guides/use-case-diagram-tutorial/}, 2026.
+\bibitem{gantt}     GanttPRO. ``What Is a Gantt Chart.''
+                     \url{https://ganttpro.com/gantt-chart-basics/}, 2026.
+
+\end{thebibliography}
+
+%==============================================================================
+%  APPENDICES
+%==============================================================================
+\appendix
+
+\chapter{Glossary and Supplementary Material}
+\label{app:glossary}
+
+\section{Glossary of Terms}
+Table~\ref{tab:glossary} defines the retail, tax and engineering vocabulary used in this
+report.
+
+\begin{table}[H]
+\centering
+\caption{Glossary of terms used in this report.}
+\label{tab:glossary}
+\small
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Term} & \textbf{Meaning} \\
+\midrule
+POS & Point of sale --- the billing screen and workflow at the till. \\
+MRP & Maximum retail price; the VAT-inclusive shelf price. \\
+SKU / barcode & Stock-keeping unit code and the scannable EAN used to find items. \\
+NBR & National Board of Revenue, Bangladesh's tax authority. \\
+Output VAT & The VAT component contained in inclusive prices, back-calculated per slab. \\
+Tender & A payment leg of a bill (cash, card, bKash, Nagad or points). \\
+GRN & Goods receipt note --- recording delivered stock against a purchase order. \\
+Z-report & End-of-shift drawer reconciliation report (day close). \\
+Shrinkage & Inventory lost to damage, theft or counting error. \\
+bKash / Nagad & Bangladeshi mobile financial services used as tenders. \\
+Standing template & A saved weekly restock list cloned into draft purchase orders. \\
+PBKDF2 & Password-Based Key Derivation Function~2 (RFC~8018) used for password hashing. \\
+Bearer token & The 256-bit session string sent in the Authorization header. \\
+RBAC & Role-based access control; permissions derive from the caller's role. \\
+GoF & ``Gang of Four'' --- the classic design-patterns catalogue (1994). \\
+POJO & Plain old Java object; the domain contains no framework annotations. \\
+SPA & Single-page application; one HTML shell with hash-routed views. \\
+BigDecimal & Java's exact-decimal arithmetic type used for every money figure. \\
+ThreadLocal & Per-thread storage carrying the caller's role for one request. \\
+Repository & The persistence interface each of the 11 models is served through. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Key API Endpoints}
+\label{app:endpoints}
+All endpoints are prefixed with \texttt{/api}; ``Token'' means any authenticated role,
+with the minimum role noted. Selected representative endpoints are listed in
+Table~\ref{tab:endpoints}.
+
+\begin{table}[H]
+\centering
+\caption{Key API endpoints.}
+\label{tab:endpoints}
+\small
+\begin{tabularx}{\textwidth}{l l X l}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Purpose} & \textbf{Access} \\
+\midrule
+POST   & /auth/login & Authenticate and issue a bearer token & Public \\
+GET    & /auth/me & Current caller identity and role & Token \\
+POST   & /bill/lines & Add a scanned or picked line to the session bill & Token \\
+PUT    & /bill/lines/\{index\} & Edit quantity / weight of a line & Token \\
+POST   & /bill/undo & Undo the last bill edit (memento, depth 10) & Token \\
+POST   & /bill/tender & Validate and commit the bill (command pipeline) & Token \\
+GET    & /products & List / search catalog with view filters & Token \\
+POST   & /products & Create a unit / weighed item (factory) & Manager+ \\
+DELETE & /products/\{id\} & Delete a catalog item & Admin \\
+POST   & /products/\{id\}/adjust & Shrinkage adjustment (damage / loss / theft / count)
+& Manager+ \\
+GET    & /sales & Sales explorer with filters & Manager+ \\
+POST   & /sales/\{receiptNo\}/void & Void a sale with mandatory reason & Manager+ \\
+POST   & /sales/\{receiptNo\}/returns & Partial per-line return, pro-rata refund &
+Token \\
+GET    & /promotions & List promotions & Token \\
+POST   & /promotions & Create a promotion & Manager+ \\
+POST   & /promotions/validate & Live coupon tester & Manager+ \\
+POST   & /customers & Register a loyalty member & Token \\
+POST   & /customers/\{id\}/points/adjust & Manual points adjustment & Manager+ \\
+POST   & /purchase-orders & Create a draft PO (builder) & Manager+ \\
+POST   & /purchase-orders/\{poNo\}/receive & Goods receipt: stock + batch + cost &
+Manager+ \\
+POST   & /purchase-orders/from-template & Clone a standing template (prototype) &
+Manager+ \\
+GET    & /reports/\{key\} & Run one of 8 reports, JSON or CSV & varies \\
+POST   & /reports/day-close & Close the day and record the Z-report & Manager+ \\
+GET    & /audit & Query the activity log & Manager+ \\
+GET    & /dev/patterns & Developer Mode pattern catalogue & Developer \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Project Timeline}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{timeline.png}
+\caption{Project Timeline and Release Milestones.}
+\label{fig:timeline}
+\end{figure}
+
+\vspace{1.5cm}
+\begin{center}
+\textit{--- End of Document ---}
+\end{center}
+
+\end{document}
