@@ -4,8 +4,8 @@
 management system for Bangladeshi supershops, built in plain Java with 18 GoF design patterns
 doing real work in the money path.
 
-![POS Billing](screenshots/pos-billing.png)
-![Dashboard](screenshots/dashboard.png)
+![POS Billing](figs/fig5_1_pos.png)
+![Dashboard](figs/fig5_5_dashboard.png)
 
 ---
 
@@ -210,9 +210,11 @@ never lost); the alert feed is deliberately ephemeral and capped.
 
 | | |
 |---|---|
-| ![POS](screenshots/pos-billing.png) | ![Receipt](screenshots/pos-receipt.png) |
-| ![Inventory](screenshots/inventory.png) | ![Purchases](screenshots/purchases.png) |
-| ![Dashboard](screenshots/dashboard.png) | ![Patterns](screenshots/pattern-studio.png) |
+| ![POS](figs/fig5_1_pos.png) | ![Receipt](figs/fig5_2_receipt.png) |
+| ![Inventory](figs/fig5_3_inventory.png) | ![Purchases](figs/fig5_4_purchases.png) |
+| ![Dashboard](figs/fig5_5_dashboard.png) | ![Patterns](figs/fig5_6_developer.png) |
+| ![Promotions](figs/fig5_7_promotions.png) | ![Day Close](figs/fig5_8_dayclose.png) |
+| ![Activity Log](figs/fig5_9_activity.png) | |
 
 The in-app **Developer Mode** (developer login only) links every one of the 18 patterns to the
 exact screen where it works, shows the real source snippet and the green test that proves it,
